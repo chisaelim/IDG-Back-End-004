@@ -1,0 +1,11 @@
+# version: "3.9"
+services:
+  app:
+    build: .
+    image: my-app:latest
+    container_name: my-app-container
+    ports:
+      - 8000:80
+      - 5173:5173
+    volumes:
+      - .:/var/www/html
