@@ -57,3 +57,65 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# IDG Back-End Course (with Basic Front-End)
+
+Welcome! This project will guide you through setting up a PHP/Laravel development environment using Docker and Docker Compose.
+
+## Quick Start Guide
+
+**Step 1: Install Docker**  
+Learn how to install Docker for Windows, Linux, or macOS:  
+👉 [How to Install Docker](./instructions/1.InstallDocker.md)
+
+**Step 2: Use Dockerfile, Build and Run with Docker, Log in to Docker Hub, Build Your Image, Push It to Docker Hub and Pull It**  
+How to build your image and manage containers using Docker commands:  
+👉 [Dockerfile Usage: Build, Run, Start, Stop, Up, Down, Push, and Pull](./instructions/2.DockerfileUsage.md)
+
+**Step 3: Use Docker Compose**  
+Simplify container management with Docker Compose:  
+👉 [Docker Compose Usage: Build, Up, and Down](./instructions/3.DockerComposeUsage.md)
+
+**Step 4: Create a Laravel Project Inside the Container**  
+Step-by-step guide to creating a new Laravel project from within your Docker container:  
+👉 [Create Laravel Project Inside Docker Container](./instructions/4.CreateLaravelProjectInsideDockerContainer.md)
+
+**Step 5: Update docker-compose.yaml to Include MySQL (MariaDB), phpMyAdmin, and Override Laravel .env**
+Expand your setup to include a database and admin interface:  
+👉 [Update docker-compose.yaml for MySQL, phpMyAdmin, and Laravel .env](./instructions/5.UpdateDockerCompose.md)
+
+**Step 6: Prepare GitHub Actions for CI/CD Deployment to Docker Hub (Test: Only push to main branch triggers build, test, and push to Docker Hub)**
+Set up automated workflows for continuous integration and deployment:  
+👉 [Prepare GitHub Actions for CI/CD Deployment to Docker Hub](./instructions/6.PrepareGitHubActionsForCIDCDeploymentToDockerHub.md)
+
+**Step 7: Introduction to API with Laravel Sanctum**  
+Learn how to set up API authentication using Laravel Sanctum:  
+👉 [Introduction to API Setup (Laravel Sanctum)](./instructions/7.IntroductionToApi.md)
+
+**Step 8: Implement Swagger UI for Laravel API Authentication**  
+Document and visualize your API authentication endpoints using Swagger UI:  
+👉 [Implement Swagger UI for Laravel API Authentication](./instructions/8.ImplementSwaggerUI.md)
+---
+
+## Project Structure
+
+- `Dockerfile` — Defines your PHP/Apache environment.
+- `docker-compose.yml` — Manages multi-container setup.
+- `instructions/` — Contains detailed guides for each setup step.
+
+---
+
+## Need Help?
+
+If you get stuck, refer to the detailed instructions in the `instructions/` folder or rea# How to Update docker-compose.yaml to Include MySQL (MariaDB) and phpMyAdmin
+
+ch out to your course instructor.
+
+---
+
+r the [MIT license](https://opensource.org/licenses/MIT).ach out to your course instructor.
+
+---er the [MIT license](https://opensource.org/licenses/MIT).
+ch out to your course instructor.
+
+---
