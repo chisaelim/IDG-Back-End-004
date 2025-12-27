@@ -95,6 +95,7 @@ Learn how to set up API authentication using Laravel Sanctum:
 **Step 8: Implement Swagger UI for Laravel API Authentication**  
 Document and visualize your API authentication endpoints using Swagger UI:  
 👉 [Implement Swagger UI for Laravel API Authentication](./instructions/8.ImplementSwaggerUI.md)
+
 ---
 
 ## Project Structure
