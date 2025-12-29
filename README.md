@@ -96,6 +96,10 @@ Learn how to set up API authentication using Laravel Sanctum:
 Document and visualize your API authentication endpoints using Swagger UI:  
 👉 [Implement Swagger UI for Laravel API Authentication](./instructions/8.ImplementSwaggerUI.md)
 
+**Step 9: Implement Email Verification and Password Reset with Custom Notifications**  
+Build a complete authentication system with email verification, password reset, and custom notification classes:  
+👉 [Email Verification and Password Reset Implementation](./instructions/9.ImplementEmailVerificationAndPasswordReset.md)
+
 ---
 
 ## Project Structure
