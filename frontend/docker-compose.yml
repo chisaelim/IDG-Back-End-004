@@ -1,0 +1,26 @@
+services:
+  vue-development:
+    build:
+      context: .
+      target: development
+    image: my-front-development:latest
+    container_name: my-front-development-container
+    volumes:
+      - ./:/app
+    ports:
+      - 5173:5173
+    tty: true
+    stdin_open: true
+    environment:
+      VITE_HMR_PORT: 5173
+
+  vue-production:
+    build:
+      context: .
+      target: production
+    image: my-front-production:latest
+    container_name: my-front-production-container
+    volumes:
+      - ./dist:/usr/local/apache2/htdocs/
+    ports:
+      - 3000:80
