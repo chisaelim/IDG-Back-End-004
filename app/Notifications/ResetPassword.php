@@ -46,7 +46,7 @@ class ResetPassword extends Notification implements ShouldQueue
             'token' => $this->token,
             'email' => $notifiable->email,
         ]);
-        $frontendUrl = env('APP_PASSWORD_RESET_URL') . '?api_url=' . urlencode($resetUrl);
+        $frontendUrl = env('APP_PASSWORD_RESET_URL') . '/' . urlencode($resetUrl);
 
         return (new MailMessage)
             ->subject('Reset Your Password')

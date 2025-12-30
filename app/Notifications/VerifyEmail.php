@@ -20,7 +20,7 @@ class VerifyEmail extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $verificationUrl = $this->verificationUrl($notifiable);
-        $frontendUrl = env('APP_EMAIL_VERIFICATION_URL') . '?api_url=' . urlencode($verificationUrl);
+        $frontendUrl = env('APP_EMAIL_VERIFICATION_URL') . '/' . urlencode($verificationUrl);
 
         return (new MailMessage)
             ->subject('Verify Email Address')
