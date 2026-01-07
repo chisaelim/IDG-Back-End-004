@@ -14,3 +14,10 @@ export async function postSignOut(token) {
 export async function postRequestResetLink(user) {
     return await axios.post(window.API_URL + '/password/forgot', user);
 }
+export async function patchRefreshToken(token) {
+    return await axios.patch(window.API_URL + '/token/refresh', null, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}

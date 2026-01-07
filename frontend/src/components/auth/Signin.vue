@@ -50,6 +50,13 @@
               </div>
             </div>
           </form>
+          
+          <div class="social-auth-links text-center mt-2 mb-3">
+            <button @click="googleSignIn" class="btn btn-block btn-danger">
+              <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
+            </button>
+          </div>
+
           <p class="mb-1">
             <router-link :to="{ name: 'auth.reset.password' }" class="text-center"
               >I forgot my password</router-link
@@ -106,6 +113,15 @@ async function signIn() {
       return CloseModal();
     }
     return MessageModal("error", "Error", error.response.data.message);
+  }
+}
+
+function googleSignIn() {
+  try {
+    LoadingModal();
+    window.location.href = `${window.API_URL}/auth/google`;
+  } catch (error) {
+    MessageModal("error", "Error", "Google sign-in failed");
   }
 }
 

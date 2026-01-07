@@ -4,6 +4,8 @@ import Signup from '@com/auth/Signup.vue';
 import VerifyEmail from '@com/auth/VerifyEmail.vue';
 import ResetPassword from '@com/auth/ResetPassword.vue';
 import SetNewPassword from '@com/auth/SetNewPassword.vue';
+import GoogleCallback from '@com/auth/GoogleCallback.vue';
+import GoogleCallbackError from '@com/auth/GoogleCallbackError.vue';
 import Dashboard from '@com/pages/Dashboard.vue';
 
 import { createRouter, createWebHistory } from 'vue-router'
@@ -41,6 +43,16 @@ const router = createRouter({
       path: '/password/reset/:api_url',
       name: 'auth.set.password',
       component: SetNewPassword,
+    },
+    {
+      path: '/auth/google/callback',
+      name: 'auth.google.callback',
+      component: GoogleCallback,
+    },
+    {
+      path: '/auth/google/callback/error',
+      name: 'auth.google.callback.error',
+      component: GoogleCallbackError,
     },
     {
       path: '/dashboard',

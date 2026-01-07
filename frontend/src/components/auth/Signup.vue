@@ -80,6 +80,13 @@
               </div>
             </div>
           </form>
+
+          <div class="social-auth-links text-center mt-2 mb-3">
+            <button @click="googleSignUp" class="btn btn-block btn-danger">
+              <i class="fab fa-google-plus mr-2"></i> Sign up using Google+
+            </button>
+          </div>
+
           <p class="mb-1">
             <router-link :to="{ name: 'auth.signin' }" class="text-center"
               >I already have a membership</router-link
@@ -143,6 +150,15 @@ async function signUp() {
       return CloseModal();
     }
     return MessageModal("error", "Error", error.response.data.message);
+  }
+}
+
+function googleSignUp() {
+  try {
+    LoadingModal();
+    window.location.href = `${window.API_URL}/auth/google`;
+  } catch (error) {
+    MessageModal("error", "Error", "Google sign-up failed");
   }
 }
 

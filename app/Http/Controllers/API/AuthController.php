@@ -197,4 +197,23 @@ class AuthController extends Controller
             'message' => 'Password has been reset successfully.'
         ], 200);
     }
+    function refreshToken(Request $request)
+    {
+        $user = $request->user();
+
+        // method 1
+        $currentToken = $user->currentAccessToken();
+        $user->tokens()->where('id', $currentToken->id)->delete();
+
+        // method 2
+        // $user->currentAccessToken()->delete();
+
+        // Create new token
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response([
+            'message' => 'Token refreshed successfully.',
+            'token' => $token
+        ], 200);
+    }
 }
