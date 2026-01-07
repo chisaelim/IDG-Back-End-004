@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "admin-lte": "^3.2.0",
+    "axios": "^1.13.2",
+    "sweetalert2": "^11.26.17",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },

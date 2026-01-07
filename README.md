@@ -108,6 +108,10 @@ Set up a Vue.js front-end project within your Docker container:
 Integrate your Vue.js front-end with the Laravel back-end API:  
 👉 [Connect Vue Front-End with Laravel Back-End API](./instructions/11.VuePageSetup.md)
 
+  - Step 11.1: Setup Sign Up Pages in Vue  
+    Create user registration pages in your Vue.js application:  
+    👉 [Setup Sign Up Pages in Vue](./instructions/11.1.SetupSignUpPage.md)
+
 ---
 
 ## Project Structure

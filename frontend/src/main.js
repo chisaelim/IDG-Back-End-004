@@ -1,12 +1,20 @@
-import 'admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js'
-import 'admin-lte/dist/js/adminlte.min.js'
+import 'admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js';
+import 'admin-lte/dist/js/adminlte.min.js';
 
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
+import Swal from 'sweetalert2';
+window.Swal = Swal;
 
-const app = createApp(App)
+import axios from 'axios';
+window.axios = axios;
 
-app.use(router)
+window.API_URL = import.meta.env.VITE_API_URL;
 
-app.mount('#app')
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
+
+const app = createApp(App);
+
+app.use(router);
+
+app.mount('#app');
