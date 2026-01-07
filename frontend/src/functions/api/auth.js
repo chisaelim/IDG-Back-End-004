@@ -11,3 +11,6 @@ export async function postSignOut(token) {
         }
     });
 }
+export async function postRequestResetLink(user) {
+    return await axios.post(window.API_URL + '/password/forgot', user);
+}

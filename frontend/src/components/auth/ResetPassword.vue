@@ -7,13 +7,22 @@
         </div>
         <div class="card-body">
           <p class="login-box-msg">Enter your email to receive a password reset link</p>
-          <form>
+          <form @submit.prevent="requestResetLink">
             <div class="input-group mb-3">
-              <input type="email" class="form-control" placeholder="Email" />
+              <input
+                v-model="user.email"
+                :class="{ 'is-invalid': !!userError.email }"
+                type="email"
+                class="form-control"
+                placeholder="Email"
+              />
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-envelope"></span>
                 </div>
+              </div>
+              <div class="invalid-feedback">
+                {{ userError.email }}
               </div>
             </div>
             <div class="row">
@@ -39,4 +48,48 @@
     </div>
   </div>
 </template>
-<script setup></script>
+<script setup>
+import { useRouter } from "vue-router";
+import { reactive } from "vue";
+import { postRequestResetLink } from "@func/api/auth";
+import { LoadingModal, MessageModal, CloseModal } from "@func/swal";
+const router = useRouter();
+
+const user = reactive({
+  email: "",
+});
+
+const userError = reactive({
+  email: "",
+});
+
+async function requestResetLink() {
+  try {
+    LoadingModal();
+    const response = await postRequestResetLink(user);
+    resetData();
+    MessageModal("success", "Success", response.data.message);
+  } catch (error) {
+    if (!error.response) {
+      return MessageModal("error", "Error", error.message);
+    }
+    if (error.response.status === 422) {
+      Object.keys(userError).forEach((key) => {
+        userError[key] = error.response.data.errors[key]
+          ? error.response.data.errors[key][0]
+          : "";
+      });
+      return CloseModal();
+    }
+    return MessageModal("error", "Error", error.response.data.message);
+  }
+}
+
+const defaultUser = JSON.parse(JSON.stringify(user));
+const defaultUserError = JSON.parse(JSON.stringify(userError));
+
+function resetData() {
+  Object.assign(user, defaultUser);
+  Object.assign(userError, defaultUserError);
+}
+</script>
