@@ -179,7 +179,6 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|max:10|confirmed'
         ]);
 
-        #####// method 1 : using Password facade
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
@@ -196,48 +195,6 @@ class AuthController extends Controller
                 'message' => 'Password has been reset successfully.'
             ], 200);
         }
-
-        #####// method 2 : manual implementation
-        // 1. Find the user by email
-        // $user = User::where('email', $request->email)->first();
-        // if (!$user) {
-        //     return response([
-        //         'message' => 'User not found.'
-        //     ], 404);
-        // }
-
-        // // 2. Check if the token is valid and not expired
-        // $record = DB::table('password_resets')->where('email', $request->email)->first();
-        // if (!$record) {
-        //     return response([
-        //         'message' => 'Invalid or expired token.'
-        //     ], 400);
-        // }
-
-        // // Check token match (Laravel hashes the token in the DB)
-        // if (!Hash::check($request->token, $record->token)) {
-        //     return response([
-        //         'message' => 'Invalid or expired token.'
-        //     ], 400);
-        // }
-
-        // // Check expiration (default: 60 minutes)
-        // $expires = 60 * 60; // 60 minutes in seconds
-        // if (strtotime($record->created_at) + $expires < time()) {
-        //     return response([
-        //         'message' => 'Token has expired.'
-        //     ], 400);
-        // }
-
-        // // 3. Hash and update the password
-        // $user->forceFill([
-        //     'password' => Hash::make($request->password)
-        // ])->setRememberToken(Str::random(60));
-        // $user->save();
-
-        // // 4. Invalidate the token
-        // DB::table('password_resets')->where('email', $request->email)->delete();
-
 
         return response([
             'message' => 'Failed to reset password.'
