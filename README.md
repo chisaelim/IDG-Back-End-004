@@ -100,6 +100,14 @@ Document and visualize your API authentication endpoints using Swagger UI:
 Build a complete authentication system with email verification, password reset, and custom notification classes:  
 👉 [Email Verification and Password Reset Implementation](./instructions/9.ImplementEmailVerificationAndPasswordReset.md)
 
+**Step 10: Create Vue Project Inside Docker Container**  
+Set up a Vue.js front-end project within your Docker container:  
+👉 [Create Vue Project Inside Docker Container](./instructions/10.CreateVueProjectInsideDockerContainer.md)
+
+**Step 11: Connect Vue Front-End with Laravel Back-End API**  
+Integrate your Vue.js front-end with the Laravel back-end API:  
+👉 [Connect Vue Front-End with Laravel Back-End API](./instructions/11.VuePageSetup.md)
+
 ---
 
 ## Project Structure
