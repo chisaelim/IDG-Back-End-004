@@ -31,10 +31,7 @@ class AuthController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return response([
-                'message' => 'User creation failed.',
-                'error' => $e->getMessage()
-            ], 500);
+            throw new \Exception($e->getMessage());
         }
 
         return response([
@@ -58,9 +55,9 @@ class AuthController extends Controller
         }
 
         if (!$user->hasVerifiedEmail()) {
-            return response([
-                'message' => 'Your email address is not verified.'
-            ], 403);
+            throw ValidationException::withMessages([
+                'email' => 'Email is not verified.',
+            ]);
         }
 
         if (!Hash::check($request->password, $user->password)) {
@@ -98,9 +95,9 @@ class AuthController extends Controller
         $user = User::findOrFail($userID);
 
         if (empty($user)) {
-            return response([
-                'message' => 'User not found.'
-            ], 422);
+            throw ValidationException::withMessages([
+                'email' => 'Email does not exist.',
+            ]);
         }
 
         if ($user->hasVerifiedEmail()) {
@@ -190,14 +187,14 @@ class AuthController extends Controller
             }
         );
 
-        if ($status === Password::PASSWORD_RESET) {
-            return response([
-                'message' => 'Password has been reset successfully.'
-            ], 200);
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'password' => [__($status)],
+            ]);
         }
 
         return response([
-            'message' => 'Failed to reset password.'
-        ], 500);
+            'message' => 'Password has been reset successfully.'
+        ], 200);
     }
 }
