@@ -132,9 +132,36 @@ Enable Google OAuth authentication in your Laravel and Vue.js application:
 
 ## Project Structure
 
-- `Dockerfile` — Defines your PHP/Apache environment.
-- `docker-compose.yml` — Manages multi-container setup.
-- `instructions/` — Contains detailed guides for each setup step.
+```
+Backend/
+├── Dockerfile
+├── docker-compose.yml
+├── start.sh
+├── .dockerignore
+├── Frontend/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── start.sh
+│   └── .dockerignore
+└── instructions/
+```
+
+---
+
+### Backend (Laravel)
+- [Dockerfile](Dockerfile) — PHP 8.2 + Apache environment with Composer & Node.js
+- [docker-compose.yml](docker-compose.yml) — Multi-container setup (app, MySQL, phpMyAdmin)
+- [start.sh](start.sh) — Backend startup script (installs dependencies, runs migrations, starts services)
+- [.dockerignore](.dockerignore) — Files excluded from Docker build
+
+### Frontend (Vue.js)
+- [frontend/Dockerfile](frontend/Dockerfile) — Vue.js development & production environments
+- [frontend/docker-compose.yml](frontend/docker-compose.yml) — Frontend container configuration
+- [frontend/start.sh](frontend/start.sh) — Frontend startup script
+- [frontend/.dockerignore](frontend/.dockerignore) — Frontend Docker exclusions
+
+### Guides
+- [instructions/](instructions/) — Detailed step-by-step setup guides
 
 ---
 
