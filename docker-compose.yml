@@ -5,9 +5,9 @@ services:
     container_name: my-app-container
     volumes:
       - ./:/var/www/html
-      # - node:/var/www/html/node_modules
-      # - laravel:/var/www/html/vendor
-    # command: sh /var/www/html/start.sh
+      - node:/var/www/html/node_modules
+      - laravel:/var/www/html/vendor
+    command: sh /var/www/html/start.sh
     ports:
       - 8000:80
     depends_on:

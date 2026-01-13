@@ -5,6 +5,7 @@ services:
       target: development
     image: my-front-development:latest
     container_name: my-front-development-container
+    command: 'sh /app/start.sh'
     volumes:
       - ./:/app
     ports:

@@ -112,6 +112,22 @@ Integrate your Vue.js front-end with the Laravel back-end API:
     Create user registration pages in your Vue.js application:  
     👉 [Setup Sign Up Pages in Vue](./instructions/11.1.SetupSignUpPage.md)
 
+  - Step 11.2: Setup Email Verification Pages in Vue  
+    Implement email verification pages in your Vue.js application:  
+    👉 [Setup Email Verification Pages in Vue](./instructions/11.2.SetupEmailVerifyPage.md)
+
+  - Step 11.3: Setup Sign In and Sign Out Pages in Vue  
+    Create user login pages in your Vue.js application:  
+    👉 [Setup Sign In Pages in Vue](./instructions/11.3.SetupSignInAndSignOutPage.md)
+  
+  - Step 11.4: Setup Password Reset and Set New Password Pages in Vue  
+    Implement password reset pages in your Vue.js application:  
+    👉 [Setup Password Reset Pages in Vue](./instructions/11.4.RequestResetPasswordAndSetNewPasswordPage.md)
+
+** Step 12: Google OAuth Integration with Laravel Socialite and Vue.js**  
+Enable Google OAuth authentication in your Laravel and Vue.js application:  
+👉 [Google OAuth Integration with Laravel Socialite and Vue.js](./instructions/12.GoogleOAuth.md)
+
 ---
 
 ## Project Structure
