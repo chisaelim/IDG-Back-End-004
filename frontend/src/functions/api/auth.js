@@ -21,3 +21,13 @@ export async function patchRefreshToken(token) {
         }
     });
 }
+export async function getVerifyAccount(token) {
+    return await axios.get(window.API_URL + '/verify/account', {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}
+export async function patchChangePassword(user) {
+    return await axios.patch(window.API_URL + '/password/change', user);
+}
