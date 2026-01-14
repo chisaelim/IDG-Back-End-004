@@ -31,9 +31,42 @@
                 <div class="text-center">
                   <img
                     class="profile-user-img img-fluid img-circle"
-                    :src="profilePic"
+                    :src="tempPhoto"
                     alt="User profile picture"
                   />
+                  <input
+                    @change="onUpdatePhoto($event)"
+                    type="file"
+                    class="d-none"
+                    :accept="allowedExtensions.map((ext) => '.' + ext).join(', ')"
+                    id="file-input"
+                  />
+                  <div class="mt-1">
+                    <label :for="'file-input'">
+                      <a type="button" class="m-1 btn btn-primary btn-sm"
+                        ><i class="fas fa-upload"></i
+                      ></a>
+                    </label>
+                    <a
+                      type="button"
+                      @click="onDeletePhoto()"
+                      class="m-1 btn btn-danger btn-sm"
+                      ><i class="fas fa-trash"></i
+                    ></a>
+                    <a
+                      type="button"
+                      @click="onResetPhoto()"
+                      class="m-1 btn btn-secondary btn-sm"
+                      ><i class="fas fa-undo-alt"></i
+                    ></a>
+                    <a
+                      v-if="changedPhoto"
+                      type="button"
+                      @click="updatePhoto()"
+                      class="m-1 btn btn-success btn-sm"
+                      ><i class="fas fa-check"></i
+                    ></a>
+                  </div>
                 </div>
 
                 <h3 class="profile-username text-center">Nina Mcintire</h3>
@@ -144,14 +177,19 @@
 </template>
 
 <script setup>
-import profilePic from "admin-lte/dist/img/user4-128x128.jpg";
+import emptyPhoto from "@assets/images/emptyPhoto.png";
 import { CloseModal, LoadingModal, MessageModal } from "@func/swal";
 import { useRouter } from "vue-router";
-import { computed, reactive } from "vue";
-import { patchChangePassword, patchCreatePassword } from "@func/api/auth";
+import { computed, reactive, ref, watch } from "vue";
+import {
+  patchChangePassword,
+  patchCreatePassword,
+  patchUpdateUserPhoto,
+} from "@func/api/auth";
 import { useStore } from "vuex";
 const store = useStore();
 const userData = computed(() => store.state.user);
+const userPhoto = computed(() => store.state.user.photo);
 
 const router = useRouter();
 const user = reactive({
@@ -191,6 +229,80 @@ async function changePassword() {
       return CloseModal();
     }
     return MessageModal("error", "Error", error.response.data.message);
+  }
+}
+
+const tempPhoto = ref(null);
+watch(
+  () => userPhoto.value,
+  (nv) => {
+    if (nv === null) {
+      return (tempPhoto.value = emptyPhoto);
+    }
+    return (tempPhoto.value = nv);
+  },
+  { immediate: true }
+);
+const changedPhoto = computed(
+  () =>
+    (tempPhoto.value !== emptyPhoto && tempPhoto.value !== userPhoto.value) ||
+    (tempPhoto.value === emptyPhoto && userPhoto.value !== null)
+);
+const allowedExtensions = ["jpg", "jpeg", "png"];
+function onUpdatePhoto(event) {
+  const files = event.target.files;
+  if (files && files.length > 0) {
+    const fileName = files[0].name;
+    const idxDot = fileName.lastIndexOf(".") + 1;
+    const extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+    if (!allowedExtensions.includes(extFile)) {
+      return (modelError.value = "Only jpg/jpeg and png files are allowed!");
+    }
+    const reader = new FileReader();
+    reader.onloadend = function () {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set canvas size to 454x454
+        canvas.width = 454;
+        canvas.height = 454;
+
+        // Calculate crop dimensions (center crop)
+        const size = Math.min(img.width, img.height);
+        const x = (img.width - size) / 2;
+        const y = (img.height - size) / 2;
+
+        // Draw image cropped and resized to 454x454
+        ctx.drawImage(img, x, y, size, size, 0, 0, 454, 454);
+
+        // Convert canvas to base64
+        tempPhoto.value = canvas.toDataURL("image/png");
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(files[0]);
+    event.target.value = null;
+  }
+}
+function onDeletePhoto() {
+  tempPhoto.value = emptyPhoto;
+}
+function onResetPhoto() {
+  tempPhoto.value = userPhoto.value;
+}
+async function updatePhoto() {
+  try {
+    LoadingModal();
+    if (tempPhoto.value === emptyPhoto) {
+      tempPhoto.value = null;
+    }
+    const response = await patchUpdateUserPhoto({ photo: tempPhoto.value });
+    store.commit("setUserPhoto", response.data.photo);
+    await MessageModal("success", "Success", response.data.message);
+  } catch (error) {
+    return MessageModal("error", "Error", error.response?.data?.message || error.message);
   }
 }
 </script>

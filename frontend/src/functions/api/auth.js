@@ -34,3 +34,6 @@ export async function patchChangePassword(user) {
 export async function patchCreatePassword(user) {
     return await axios.patch(window.API_URL + '/password/create', user);
 }
+export async function patchUpdateUserPhoto(photoData) {
+    return await axios.patch(window.API_URL + '/update/photo', photoData);
+}

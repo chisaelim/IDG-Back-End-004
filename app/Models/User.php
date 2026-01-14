@@ -7,6 +7,7 @@ use App\Notifications\VerifyEmail;
 use App\Notifications\ResetPassword;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
@@ -30,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'email',
         'password',
         'email_verified_at',
+        'photo'
     ];
 
     /**
@@ -53,6 +55,15 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected function Photo(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string|null $value) => $value ?
+                asset('storage/profile/' . $value) :
+                null,
+        );
     }
 
     function getPasswordNullAttribute(): bool

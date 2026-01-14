@@ -24,6 +24,11 @@ const store = createStore({
         setUser(state, user) {
             state.user = user;
         },
+        setUserPhoto(state, photo) {
+            if (state.user) {
+                state.user.photo = photo;
+            }
+        },
     },
     actions: {
         async verifyAccount({ commit }) {

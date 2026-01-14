@@ -25,4 +25,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/verify/account', [AuthController::class, 'verifyAccount']);
     Route::patch('/password/change', [AuthController::class, 'changePassword']);
     Route::patch('/password/create', [AuthController::class, 'createPassword']);
+    Route::patch('/update/photo', [AuthController::class, 'updateUserPhoto']);
 });

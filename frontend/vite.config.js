@@ -15,6 +15,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       '@com': fileURLToPath(new URL('./src/components', import.meta.url)),
       '@func': fileURLToPath(new URL('./src/functions', import.meta.url)),
+      '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
     },
   },
   server: {

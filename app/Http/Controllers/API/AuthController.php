@@ -6,6 +6,7 @@ use Hash;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Traits\UploadMethod;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Password;
@@ -13,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    use UploadMethod;
     function signup(Request $request)
     {
         $fields = $request->validate([
@@ -254,7 +256,7 @@ class AuthController extends Controller
                 $currentToken = $user->currentAccessToken();
                 $user->tokens()->where('id', $currentToken->id)->delete();
             }
-            
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -297,6 +299,33 @@ class AuthController extends Controller
 
         return response([
             'message' => 'Password created successfully.'
+        ], 200);
+    }
+    function updateUserPhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'nullable|base64image|base64mimes:png,jpg,jpeg|base64dimensions:width=454,height=453'
+        ]);
+
+        $user = $request->user();
+
+        try {
+            DB::beginTransaction();
+            UploadMethod::discardImage($user->getRawOriginal('photo'), 'profile');
+            $user->photo = null;
+            if (!empty($request->photo)) {
+                $user->photo = UploadMethod::storeImage($request->photo, 'profile');
+            }
+            $user->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
+
+        return response([
+            'message' => 'User photo updated successfully.',
+            'photo' => $user->photo
         ], 200);
     }
 }
