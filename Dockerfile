@@ -13,7 +13,8 @@ RUN apt-get update -y && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
-    libzip-dev
+    libzip-dev \
+    mariadb-client
 
 # Install PHP extensions
 RUN docker-php-ext-install gettext intl pdo_mysql gd pcntl zip
