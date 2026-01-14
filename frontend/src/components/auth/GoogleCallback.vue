@@ -18,7 +18,9 @@ import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { MessageModal } from "@func/swal";
 import { patchRefreshToken } from "@func/api/auth";
+import { useStore } from "vuex";
 
+const store = useStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -29,6 +31,7 @@ onMounted(async () => {
     if (token) {
       const response = await patchRefreshToken(token);
       localStorage.setItem("token", response.data.token);
+      await store.dispatch("verifyAccount");
       router.replace({ name: "dashboard" });
     } else {
       router.replace({ name: "auth.signin" });

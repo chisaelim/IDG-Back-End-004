@@ -1,8 +1,26 @@
 <template>
-  <div class="alert alert-success" role="alert">
-    You are logged in successfully. This is your dashboard.
-    <router-link :to="{ name: 'auth.signout' }"
-      ><i class="fas fa-sign-out-alt text-danger"></i
-    ></router-link>
+  <div class="content-wrapper" style="min-height: 1416px">
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Dashboard</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item">
+                <router-link :to="{ name: 'dashboard' }">Home</router-link>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="container-fluid"></div>
+    </section>
   </div>
 </template>
+
+<script setup></script>

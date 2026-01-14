@@ -128,6 +128,10 @@ Integrate your Vue.js front-end with the Laravel back-end API:
 Enable Google OAuth authentication in your Laravel and Vue.js application:  
 👉 [Google OAuth Integration with Laravel Socialite and Vue.js](./instructions/12.GoogleOAuth.md)
 
+** Step 13: Verify User Account & Frontend Vue View Handling**  
+Implement user account verification and manage front-end views in Vue.js:  
+👉 [Verify User Account & Frontend Vue View Handling](./instructions/13.VerifyUserAndFrontVueViewHandling.md)
+
 ---
 
 ## Project Structure

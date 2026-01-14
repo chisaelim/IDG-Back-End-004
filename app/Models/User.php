@@ -17,6 +17,9 @@ class User extends Authenticatable implements MustVerifyEmailContract
     use HasFactory, Notifiable;
     use HasApiTokens, MustVerifyEmail;
 
+    protected $appends = [
+        'password_null',
+    ];
     /**
      * The attributes that are mass assignable.
      *
@@ -26,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'name',
         'email',
         'password',
+        'email_verified_at',
     ];
 
     /**
@@ -49,6 +53,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    function getPasswordNullAttribute(): bool
+    {
+        return empty($this->password);
     }
 
     public function sendEmailVerificationNotification()

@@ -50,7 +50,7 @@
               </div>
             </div>
           </form>
-          
+
           <div class="social-auth-links text-center mt-2 mb-3">
             <button @click="googleSignIn" class="btn btn-block btn-danger">
               <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
@@ -80,6 +80,9 @@ import { useRouter } from "vue-router";
 import { reactive } from "vue";
 import { postSignIn } from "@func/api/auth";
 import { LoadingModal, MessageModal, CloseModal } from "@func/swal";
+import { useStore } from "vuex";
+
+const store = useStore();
 const router = useRouter();
 
 const user = reactive({
@@ -97,6 +100,7 @@ async function signIn() {
     LoadingModal();
     const response = await postSignIn(user);
     localStorage.setItem("token", response.data.token);
+    await store.dispatch("verifyAccount");
     resetData();
     router.replace({ name: "dashboard" });
     CloseModal();
