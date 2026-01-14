@@ -71,7 +71,7 @@
                 <div class="tab-content">
                   <div class="active tab-pane" id="password_settings">
                     <form @submit.prevent="changePassword" class="form-horizontal">
-                      <div v-if="!loggedUser.password_null" class="form-group row">
+                      <div v-if="!userData.password_null" class="form-group row">
                         <label class="col-sm-2 col-form-label">Old Password</label>
                         <div class="col-sm-10">
                           <input
@@ -151,7 +151,7 @@ import { computed, reactive } from "vue";
 import { patchChangePassword, patchCreatePassword } from "@func/api/auth";
 import { useStore } from "vuex";
 const store = useStore();
-const loggedUser = computed(() => store.state.user);
+const userData = computed(() => store.state.user);
 
 const router = useRouter();
 const user = reactive({
@@ -170,7 +170,7 @@ async function changePassword() {
   try {
     LoadingModal();
     let response;
-    if (loggedUser.value.password_null) {
+    if (userData.value.password_null) {
       response = await patchCreatePassword(user);
     } else {
       response = await patchChangePassword(user);
