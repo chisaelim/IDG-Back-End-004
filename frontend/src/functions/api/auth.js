@@ -31,3 +31,6 @@ export async function getVerifyAccount(token) {
 export async function patchChangePassword(user) {
     return await axios.patch(window.API_URL + '/password/change', user);
 }
+export async function patchCreatePassword(user) {
+    return await axios.patch(window.API_URL + '/password/create', user);
+}

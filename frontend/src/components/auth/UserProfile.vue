@@ -61,17 +61,17 @@
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
                   <li class="nav-item">
-                    <a class="nav-link active" href="#settings" data-toggle="tab"
-                      >Settings</a
+                    <a class="nav-link active" href="#password_settings" data-toggle="tab"
+                      >Password Settings</a
                     >
                   </li>
                 </ul>
               </div>
               <div class="card-body">
                 <div class="tab-content">
-                  <div class="active tab-pane" id="settings">
+                  <div class="active tab-pane" id="password_settings">
                     <form @submit.prevent="changePassword" class="form-horizontal">
-                      <div class="form-group row">
+                      <div v-if="!loggedUser.password_null" class="form-group row">
                         <label class="col-sm-2 col-form-label">Old Password</label>
                         <div class="col-sm-10">
                           <input
@@ -147,8 +147,11 @@
 import profilePic from "admin-lte/dist/img/user4-128x128.jpg";
 import { CloseModal, LoadingModal, MessageModal } from "@func/swal";
 import { useRouter } from "vue-router";
-import { reactive } from "vue";
-import { patchChangePassword } from "@func/api/auth";
+import { computed, reactive } from "vue";
+import { patchChangePassword, patchCreatePassword } from "@func/api/auth";
+import { useStore } from "vuex";
+const store = useStore();
+const loggedUser = computed(() => store.state.user);
 
 const router = useRouter();
 const user = reactive({
@@ -166,7 +169,12 @@ const userError = reactive({
 async function changePassword() {
   try {
     LoadingModal();
-    const response = await patchChangePassword(user);
+    let response;
+    if (loggedUser.value.password_null) {
+      response = await patchCreatePassword(user);
+    } else {
+      response = await patchChangePassword(user);
+    }
     await MessageModal("success", "Success", response.data.message, () =>
       router.push({ name: "dashboard" })
     );

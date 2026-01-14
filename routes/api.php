@@ -24,4 +24,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/token/refresh', [AuthController::class, 'refreshToken']);
     Route::get('/verify/account', [AuthController::class, 'verifyAccount']);
     Route::patch('/password/change', [AuthController::class, 'changePassword']);
+    Route::patch('/password/create', [AuthController::class, 'createPassword']);
 });

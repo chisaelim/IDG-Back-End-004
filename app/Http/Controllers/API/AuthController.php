@@ -265,4 +265,38 @@ class AuthController extends Controller
             'message' => 'Password changed successfully.'
         ], 200);
     }
+
+    function createPassword(Request $request)
+    {
+        $request->validate([
+            'new_password' => 'required|string|min:6|max:10|confirmed',
+            'terminate_sessions' => 'required|boolean'
+        ]);
+
+        $user = $request->user();
+
+        try {
+            DB::beginTransaction();
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            if ($request->terminate_sessions) {
+                // delete all tokens
+                $user->tokens()->delete();
+            } else {
+                // delete current token only
+                $currentToken = $user->currentAccessToken();
+                $user->tokens()->where('id', $currentToken->id)->delete();
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
+
+        return response([
+            'message' => 'Password created successfully.'
+        ], 200);
+    }
 }
