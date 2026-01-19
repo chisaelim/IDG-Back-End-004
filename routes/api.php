@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\API\BackupController;
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/signin', [AuthController::class, 'signin']);
@@ -21,4 +22,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/password/change', [AuthController::class, 'changePassword']);
     Route::patch('/password/create', [AuthController::class, 'createPassword']);
     Route::patch('/update/photo', [AuthController::class, 'updateUserPhoto']);
+
+    Route::prefix('backups')->group(function () {
+        Route::post('/create', [BackupController::class, 'createBackup']);
+        Route::get('/list', [BackupController::class, 'listBackups']);
+        Route::get('/download/{filename}', [BackupController::class, 'downloadBackup']);
+        Route::delete('/delete/{filename}', [BackupController::class, 'deleteBackup']);
+    });
 });
