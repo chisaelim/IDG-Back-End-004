@@ -14,11 +14,6 @@ Route::post('/password/reset', [AuthController::class, 'setNewPassword'])->name(
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
-// Route::post('/signout', [AuthController::class, 'signout'])->middleware('auth:sanctum');
-// Route::patch('/token/refresh', [AuthController::class, 'refreshToken'])->middleware('auth:sanctum');
-// Route::get('/verify/account',[AuthController::class, 'verifyAccount'])->middleware('auth:sanctum');
-// Route::patch('/password/change',[AuthController::class, 'changePassword'])->middleware('auth:sanctum');
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/signout', [AuthController::class, 'signout']);
     Route::patch('/token/refresh', [AuthController::class, 'refreshToken']);
