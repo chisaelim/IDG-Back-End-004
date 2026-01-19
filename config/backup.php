@@ -24,6 +24,7 @@ return [
                  * Directories used by the backup process will automatically be excluded.
                  */
                 'exclude' => [
+                    base_path('frontend'),
                     base_path('vendor'),
                     base_path('node_modules'),
                 ],
@@ -211,7 +212,7 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('MAIL_USERNAME', 'hello@example.com'),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
