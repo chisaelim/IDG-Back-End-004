@@ -12,7 +12,7 @@ import Dashboard from '@com/pages/Dashboard.vue';
 import { createRouter, createWebHistory } from 'vue-router'
 import Navbar from '@com/includes/Navbar.vue';
 import Footer from '@com/includes/Footer.vue';
-import Sidebar from '@/components/includes/Sidebar.vue';
+import Sidebar from '@com/includes/Sidebar.vue';
 
 const includes = {
   navbar: Navbar,
