@@ -8,6 +8,7 @@ import GoogleCallback from '@com/auth/GoogleCallback.vue';
 import GoogleCallbackError from '@com/auth/GoogleCallbackError.vue';
 import UserProfile from '@com/auth/UserProfile.vue';
 import Dashboard from '@com/pages/Dashboard.vue';
+import Backup from '@com/pages/Backup.vue';
 
 import { createRouter, createWebHistory } from 'vue-router'
 import Navbar from '@com/includes/Navbar.vue';
@@ -87,7 +88,16 @@ const router = createRouter({
         ...includes,
       },
       meta: { guard: true },
-    }
+    },
+    {
+      path: '/backups',
+      name: 'backups',
+      components: {
+        default: Backup,
+        ...includes,
+      },
+      meta: { guard: true },
+    },
   ],
 })
 

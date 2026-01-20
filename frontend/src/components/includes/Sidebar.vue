@@ -75,7 +75,13 @@
               <p>Dashboard</p>
             </router-link>
           </li>
-          <li class="nav-header">More</li>
+          <li class="nav-header">Systems</li>
+          <li class="nav-item">
+            <router-link :to="{ name: 'backups' }" class="nav-link" active-class="active">
+              <i class="nav-icon fas fa-database"></i>
+              <p>Backups</p>
+            </router-link>
+          </li>
         </ul>
       </nav>
     </div>
