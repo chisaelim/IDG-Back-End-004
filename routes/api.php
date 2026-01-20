@@ -25,7 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('backups')->group(function () {
         Route::post('/create', [BackupController::class, 'createBackup']);
-        Route::get('/list', [BackupController::class, 'listBackups']);
+        Route::get('/list', [BackupController::class, 'backUpList']);
         Route::get('/download/{filename}', [BackupController::class, 'downloadBackup']);
         Route::delete('/delete/{filename}', [BackupController::class, 'deleteBackup']);
     });

@@ -47,7 +47,7 @@ class BackupController extends Controller
         }
     }
 
-    public function listBackups()
+    public function backUpList()
     {
         try {
             $disk = Storage::disk(config('backup.backup.destination.disks')[0]);
