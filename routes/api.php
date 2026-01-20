@@ -23,10 +23,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/password/create', [AuthController::class, 'createPassword']);
     Route::patch('/update/photo', [AuthController::class, 'updateUserPhoto']);
 
-    Route::prefix('backups')->group(function () {
-        Route::get('/', [BackupController::class, 'getBackups']);
-        Route::post('/create', [BackupController::class, 'createBackup']);
-        Route::get('/download/{filename}', [BackupController::class, 'downloadBackup']);
-        Route::delete('/delete/{filename}', [BackupController::class, 'deleteBackup']);
+    Route::middleware('admin')->group(function () {
+        Route::prefix('backups')->group(function () {
+            Route::get('/', [BackupController::class, 'getBackups']);
+            Route::post('/create', [BackupController::class, 'createBackup']);
+            Route::get('/download/{filename}', [BackupController::class, 'downloadBackup']);
+            Route::delete('/delete/{filename}', [BackupController::class, 'deleteBackup']);
+        });
     });
 });

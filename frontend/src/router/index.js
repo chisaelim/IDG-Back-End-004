@@ -15,6 +15,18 @@ import Navbar from '@com/includes/Navbar.vue';
 import Footer from '@com/includes/Footer.vue';
 import Sidebar from '@com/includes/Sidebar.vue';
 
+import { useStore } from 'vuex';
+function authorize(roles) {
+  return (to, from, next) => {
+    const store = useStore();
+    const user = store.state.user;
+    if (user && roles.includes(user.level)) {
+      return next();
+    }
+    return next({ name: 'dashboard' });
+  }
+}
+
 const includes = {
   navbar: Navbar,
   sidebar: Sidebar,
@@ -97,6 +109,7 @@ const router = createRouter({
         ...includes,
       },
       meta: { guard: true },
+      beforeEnter: authorize(['admin'])
     },
   ],
 })
