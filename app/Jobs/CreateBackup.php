@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class RunBackupJob implements ShouldQueue
+class CreateBackup implements ShouldQueue
 {
     use Queueable;
 
