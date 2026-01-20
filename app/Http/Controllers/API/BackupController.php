@@ -42,7 +42,7 @@ class BackupController extends Controller
         }
     }
 
-    public function backUpList()
+    public function getBackups()
     {
         try {
             $files = $this->disk->files($this->backupName);
