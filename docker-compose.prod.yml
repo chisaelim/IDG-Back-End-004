@@ -26,7 +26,7 @@ services:
       # Google OAuth (CRITICAL)
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GOOGLE_REDIRECT_URI: "https://ultralink.cloud/api/auth/google/callback"
+      GOOGLE_REDIRECT_URL: "https://ultralink.cloud/api/auth/google/callback"
 
       # Database Configuration
       DB_CONNECTION: mysql
@@ -50,19 +50,6 @@ services:
       - mysql:/var/lib/mysql
     ports:
       - 3306:3306
-  phpmyadmin:
-    image: phpmyadmin:5.2.2
-    container_name: phpmyadmin-ultralink.cloud-container
-    depends_on:
-      - mysql
-    environment:
-      UPLOAD_LIMIT: 50M
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      # PMA_USER: root
-      # PMA_PASSWORD: root
-    ports:
-      - 9000:80
 volumes:
   mysql:
     name: ultralink.cloud-mysql
