@@ -21,14 +21,18 @@ jobs:
           port: 22
           source: "."
           target: "~/ultralink.cloud"
-      # - name: Deploy on VPS via SSH
-      #   uses: appleboy/ssh-action@v1.0.3
-      #   with:
-      #     host: ${{ secrets.VPS_HOST }}
-      #     username: ${{ secrets.VPS_USER }}
-      #     key: ${{ secrets.VPS_SSH_KEY }}
-      #     port: 22
-      #     script: |
-      #       cd ~/ultralink.cloud
-      #       docker compose -f docker-compose.prod.yaml down || true
-      #       docker compose -f docker-compose.prod.yaml up -d --build
+      - name: Deploy Backend and Frontend on VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/ultralink.cloud
+            docker compose -f docker-compose.prod.yml down || true
+            docker compose -f docker-compose.prod.yml up -d --build
+            cd ~/ultralink.cloud/frontend
+            docker compose -f docker-compose.prod.yml down || true
+            docker compose -f docker-compose.prod.yml up -d --build
+      

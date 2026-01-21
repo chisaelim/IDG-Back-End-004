@@ -1,0 +1,72 @@
+services:
+  app:
+    build: .
+    image: ultralink.cloud:latest
+    container_name: ultralink.cloud-container
+    volumes:
+      - .env/:/var/www/html/.env
+    #   - ./:/var/www/html
+    #   - node:/var/www/html/node_modules
+    #   - laravel:/var/www/html/vendor
+    command: sh /var/www/html/production.sh
+    ports:
+      - 8000:80
+    depends_on:
+      - mysql
+    environment:
+      # Application Settings
+      APP_NAME: UltraLink
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: https://ultralink.cloud
+      APP_FRONTEND_URL: https://ultralink.cloud
+      APP_EMAIL_VERIFICATION_URL: "https://ultralink.cloud/email/verify"
+      APP_PASSWORD_RESET_URL: "https://ultralink.cloud/password/reset"
+
+      # Google OAuth (CRITICAL)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: "https://ultralink.cloud/api/auth/google/callback"
+
+      # Database Configuration
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+  mysql:
+    image: mariadb:10.11.13
+    container_name: mysql-ultralink.cloud-container
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: UTC
+    command: --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+  phpmyadmin:
+    image: phpmyadmin:5.2.2
+    container_name: phpmyadmin-ultralink.cloud-container
+    depends_on:
+      - mysql
+    environment:
+      UPLOAD_LIMIT: 50M
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      # PMA_USER: root
+      # PMA_PASSWORD: root
+    ports:
+      - 9000:80
+volumes:
+  mysql:
+    name: ultralink.cloud-mysql
+  node:
+    name: ultralink.cloud-node
+  laravel:
+    name: ultralink.cloud-laravel
