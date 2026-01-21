@@ -7,5 +7,3 @@ services:
     container_name: my-front-production-container
     ports:
       - 3000:80
-    environment:
-      VITE_API_URL: https://ultralink.cloud/api

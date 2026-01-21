@@ -9,6 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+ENV VITE_API_URL=https://ultralink.cloud/api
 RUN npm run build
 
 FROM httpd:alpine AS production
