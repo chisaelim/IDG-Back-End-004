@@ -304,7 +304,7 @@ class AuthController extends Controller
     function updateUserPhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'nullable|base64image|base64mimes:png,jpg,jpeg|base64dimensions:width=454,height=453'
+            'photo' => 'nullable|base64image|base64mimes:png,jpg,jpeg|base64dimensions:width=454,height=454'
         ]);
 
         $user = $request->user();

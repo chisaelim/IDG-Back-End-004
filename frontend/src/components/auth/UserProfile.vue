@@ -290,7 +290,7 @@ function onDeletePhoto() {
   tempPhoto.value = emptyPhoto;
 }
 function onResetPhoto() {
-  tempPhoto.value = userPhoto.value;
+  tempPhoto.value = userPhoto.value ? userPhoto.value : emptyPhoto;
 }
 async function updatePhoto() {
   try {
