@@ -3,6 +3,8 @@ services:
     build:
       context: .
       target: production
+      args:
+        VITE_API_URL: https://ultralink.cloud/api
     image: my-front-production:latest
     container_name: my-front-production-container
     ports:
