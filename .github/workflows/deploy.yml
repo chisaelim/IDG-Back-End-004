@@ -2,7 +2,7 @@ name: CI/CD pipeline
 
 on:
   push:
-    branches: [week5]
+    branches: [branch]
   # pull_request:
   #   branches: [ main ]
 
