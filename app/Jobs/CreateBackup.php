@@ -21,9 +21,11 @@ class CreateBackup implements ShouldQueue
     {
         if ($this->flag === 'db') {
             Artisan::call('backup:run', ['--only-db' => true]);
-        } elseif ($this->flag === 'files') {
+        }
+        if ($this->flag === 'files') {
             Artisan::call('backup:run', ['--only-files' => true]);
-        } else {
+        }
+        if ($this->flag === 'full') {
             Artisan::call('backup:run');
         }
     }

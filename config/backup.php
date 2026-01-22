@@ -15,7 +15,8 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    base_path('storage'),
+                    base_path('public'),
                 ],
 
                 /*
@@ -98,7 +99,7 @@ return [
         /*
          * If specified, the database dumped file name will contain a timestamp (e.g.: 'Y-m-d-H-i-s').
          */
-        'database_dump_file_timestamp_format' => null,
+        'database_dump_file_timestamp_format' => 'Y-m-d-H-i-s',
 
         /*
          * The base of the dump filename, either 'database' or 'connection'

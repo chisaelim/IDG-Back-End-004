@@ -14,14 +14,4 @@ services:
     stdin_open: true
     environment:
       VITE_HMR_PORT: 5173
-
-  vue-production:
-    build:
-      context: .
-      target: production
-    image: my-front-production:latest
-    container_name: my-front-production-container
-    volumes:
-      - ./dist:/usr/local/apache2/htdocs/
-    ports:
-      - 3000:80
+      VITE_API_URL: http://localhost:8000/api

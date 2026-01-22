@@ -1,0 +1,39 @@
+name: CI/CD pipeline
+
+on:
+  push:
+    branches: [tempweek4]
+  # pull_request:
+  #   branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Copy files to VPS via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "."
+          target: "~/ultralink.cloud"
+          
+    #   - name: Deploy Backend and Frontend on VPS via SSH
+    #     uses: appleboy/ssh-action@v1.0.3
+    #     with:
+    #       host: ${{ secrets.VPS_HOST }}
+    #       username: ${{ secrets.VPS_USER }}
+    #       key: ${{ secrets.VPS_SSH_KEY }}
+    #       port: 22
+    #       script: |
+    #         cd ~/example.cloud
+    #         docker compose -f docker-compose.prod.yml down || true
+    #         docker compose -f docker-compose.prod.yml up -d --build
+    #         cd ~/example.cloud/frontend
+    #         docker compose -f docker-compose.prod.yml down || true
+    #         docker compose -f docker-compose.prod.yml up -d --build

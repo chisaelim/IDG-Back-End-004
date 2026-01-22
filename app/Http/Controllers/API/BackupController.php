@@ -24,16 +24,7 @@ class BackupController extends Controller
         ]);
         try {
             $flag = $request->input('flag');
-            if ($flag === 'db') {
-                Artisan::call('backup:run', ['--only-db' => true]);
-            }
-            if ($flag === 'files') {
-                Artisan::call('backup:run', ['--only-files' => true]);
-            }
-            if ($flag === 'full') {
-                Artisan::call('backup:run');
-            }
-            // CreateBackup::dispatch($flag);
+            CreateBackup::dispatch($flag);
             return response([
                 'message' => 'Backup process started.'
             ], 202);
@@ -50,7 +41,7 @@ class BackupController extends Controller
                 return [
                     'name' => basename($file),
                     'size' => $this->disk->size($file),
-                    'date' => $this->disk->lastModified($file),
+                    'date' => $this->disk->lastModified($file), 
                     'size_human' => $this->formatBytes($this->disk->size($file)),
                     'date_human' => date('Y-m-d H:i:s', $this->disk->lastModified($file)),
                 ];
