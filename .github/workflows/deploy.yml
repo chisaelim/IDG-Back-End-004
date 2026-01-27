@@ -1,6 +1,6 @@
 name: CI/CD pipeline
 env:
-  NGINX_CONFIG: mtosb.com
+  NGINX_CONFIG: ultralink.cloud
 on:
   push:
     branches: [week5]
