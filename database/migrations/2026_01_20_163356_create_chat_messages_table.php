@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('type', ['text', 'image', 'video', 'file']);
             $table->unsignedBigInteger('chat_id')->index('chat_id');
             $table->unsignedBigInteger('user_id')->index('user_id');
+            $table->timestamp('seen_at')->nullable();
             $table->timestamps();
         });
     }

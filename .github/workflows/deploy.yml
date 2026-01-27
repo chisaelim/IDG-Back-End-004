@@ -3,7 +3,7 @@ env:
   NGINX_CONFIG: ultralink.cloud
 on:
   push:
-    branches: [week5]
+    branches: [branch]
 
 jobs:
   deploy:
