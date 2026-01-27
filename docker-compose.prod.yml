@@ -58,7 +58,7 @@ services:
       UPLOAD_LIMIT: 50M
       PMA_HOST: mysql
       PMA_PORT: 3306
-      PMA_ABSOLUTE_URI: "https://ultralink.cloud/phpmyadmin/"
+      PMA_ABSOLUTE_URI: "/phpmyadmin/"
     ports:
       - 9000:80
 volumes:
