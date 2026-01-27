@@ -164,6 +164,22 @@ Set up GitHub Actions for continuous integration and deployment:
 Deploy your application from GitHub to your VPS:  
 👉 [Deploy to Production Server from GitHub to VPS](./instructions/21.PrepareDockerFilesForProduction.md)
 
+** Step 22: Automated Nginx Deployment with phpMyAdmin Integration**  
+Automate Nginx configuration deployment and integrate phpMyAdmin:  
+👉 [Automated Nginx Deployment with phpMyAdmin Integration](./instructions/22.AutomateNginxConfig.md)
+
+** Step 23: Prepare Database for Chat Functionality**
+Set up your database schema and migrations for chat features:  
+👉 [Prepare Database for Chat Functionality](./instructions/23.PrepareDatabaseForChat.md)
+
+** Step 24: Generate Sample Data for Testing**  
+Create sample data to test your chat functionality:  
+👉 [Generate Sample Data for Testing](./instructions/24.GenerateSampleDataForTesting.md)
+
+** Step 25: Implement Api Chat Endpoints in Laravel**  
+Develop API endpoints to support chat features in your Laravel application:  
+👉 [Implement Api Chat Endpoints in Laravel](./instructions/25.ImplementApiChatEndpoints.md)
+
 ---
 
 ## Project Structure
