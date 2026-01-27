@@ -1,10 +1,9 @@
 name: CI/CD pipeline
-
+env:
+  NGINX_CONFIG: mtosb.com
 on:
   push:
-    branches: [branch-name]
-  # pull_request:
-  #   branches: [ main ]
+    branches: [week5]
 
 jobs:
   deploy:
@@ -29,10 +28,23 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
+            # Deploy Backend
             cd ~/ultralink.cloud
             docker compose -f docker-compose.prod.yml down || true
             docker compose -f docker-compose.prod.yml up -d --build
+
+            # Deploy Frontend
             cd ~/ultralink.cloud/frontend
             docker compose -f docker-compose.prod.yml down || true
             docker compose -f docker-compose.prod.yml up -d --build
-      
+
+            # Install nginx if not installed
+            sudo apt update && sudo apt install -y nginx
+
+            # Overwrite nginx config file
+            sudo cp ~/ultralink.cloud/${{ env.NGINX_CONFIG }} /etc/nginx/sites-available/${{ env.NGINX_CONFIG }}
+            sudo ln -sf /etc/nginx/sites-available/${{ env.NGINX_CONFIG }} /etc/nginx/sites-enabled/
+            sudo rm -f /etc/nginx/sites-enabled/default
+
+            # Test and reload nginx
+            sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx && sudo systemctl reload nginx

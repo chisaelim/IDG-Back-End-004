@@ -49,6 +49,18 @@ services:
       - mysql:/var/lib/mysql
     ports:
       - 3306:3306
+  phpmyadmin:
+    image: phpmyadmin:5.2.2
+    container_name: phpmyadmin-ultralink.cloud-container
+    depends_on:
+      - mysql
+    environment:
+      UPLOAD_LIMIT: 50M
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ABSOLUTE_URI: "https://ultralink.cloud/phpmyadmin/"
+    ports:
+      - 9000:80
 volumes:
   mysql:
     name: ultralink.cloud-mysql

@@ -1,0 +1,62 @@
+# ===== NGINX CONFIGURATION START =====
+
+# Main HTTPS server
+server {
+    listen 443 ssl http2;
+    server_name ultralink.cloud www.ultralink.cloud;
+
+    # SSL files
+    ssl_certificate /etc/letsencrypt/live/ultralink.cloud/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ultralink.cloud/privkey.pem;
+
+    location /api/ {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    # phpMyAdmin at /phpmyadmin/
+    location = /phpmyadmin { return 301 /phpmyadmin/; }
+    location /phpmyadmin/ {
+        proxy_pass http://localhost:9000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_cookie_path / /phpmyadmin/;
+        proxy_redirect     default;
+        proxy_buffering    off;
+        client_max_body_size 100M;
+    }
+}
+
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name ultralink.cloud www.ultralink.cloud;
+    return 301 https://$host$request_uri;
+}
+
+# Block direct HTTP/IP access
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name _;
+    return 444; # or 403;
+}
+
+# ===== NGINX CONFIGURATION END =====
