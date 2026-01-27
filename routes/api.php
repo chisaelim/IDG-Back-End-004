@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\API\BackupController;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\ChatMessageController;
+use App\Http\Controllers\Api\ChatMemberController;
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/signin', [AuthController::class, 'signin']);
@@ -30,5 +33,30 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/download/{filename}', [BackupController::class, 'downloadBackup']);
             Route::delete('/delete/{filename}', [BackupController::class, 'deleteBackup']);
         });
+    });
+
+    // Chat API Routes
+    Route::prefix('chats')->group(function () {
+        // Chat management
+        Route::get('/', [ChatController::class, 'getChats']);
+        Route::post('/create', [ChatController::class, 'createChat']);
+        Route::get('/read/{chatId}', [ChatController::class, 'readChat']);
+        Route::patch('update/{chatId}', [ChatController::class, 'updateGroupChat']);
+        Route::delete('delete/{chatId}', [ChatController::class, 'deleteGroupChat']);
+        Route::post('leave/{chatId}', [ChatController::class, 'leaveGroupChat']);
+
+        // Chat messages
+        Route::get('/{chatId}/messages', [ChatMessageController::class, 'getMessages']);
+        Route::post('/{chatId}/messages/create', [ChatMessageController::class, 'createMessage']);
+        Route::patch('/{chatId}/messages/update/{messageId}', [ChatMessageController::class, 'updateMessage']);
+        Route::delete('/{chatId}/messages/delete/{messageId}', [ChatMessageController::class, 'deleteMessage']);
+        Route::post('/{chatId}/messages/seen/{messageId}', [ChatMessageController::class, 'markMessageAsSeen']);
+        Route::post('/{chatId}/messages/seen-all', [ChatMessageController::class, 'markAllMessagesAsSeen']);
+
+        // Chat members
+        Route::get('/{chatId}/members', [ChatMemberController::class, 'getMembers']);
+        Route::post('/{chatId}/members/add', [ChatMemberController::class, 'addMember']);
+        Route::patch('/{chatId}/members/update/{memberId}', [ChatMemberController::class, 'updateMember']);
+        Route::delete('/{chatId}/members/remove/{memberId}', [ChatMemberController::class, 'removeMember']);
     });
 });
