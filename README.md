@@ -140,6 +140,30 @@ Create user profile management features with avatar upload functionality:
 Implement Spatie Backup for database and file backups in your Laravel application:  
 👉 [Set up Spatie Backup Integration](./instructions/15.SpatieBackupIntegration.md)
 
+** Step 16: Set up Back Up Page in Vue** 
+Create a backup management page in your Vue.js application:  
+👉 [Set up Back Up Page in Vue](./instructions/16.SetupBackupPage.md)
+
+** Step 17: Create Custom Middleware for Admin Access Control**  
+Implement role-based access control to restrict certain features to admin users only:  
+👉 [Create Custom Middleware for Role-Based Access Control](./instructions/17.CreateCustomMiddleware.md)
+
+** Step 18: Verify Local Docker files and prepare for production copy**  
+Ensure your Docker files are ready to be copied from local to production:
+👉 [Verify Local Docker files and prepare for production copy](./instructions/18.VerifyLocalDockerFiles.md)
+
+** Step 19: VPS configuration and Docker installation**  
+Set up your VPS and install Docker for deployment:  
+👉 [VPS configuration and Docker installation](./instructions/19.VPSConfiguration.md)
+
+** Step 20: Prepare Git Actions for CI/CD**  
+Set up GitHub Actions for continuous integration and deployment:  
+👉 [Prepare Git Actions for CI/CD](./instructions/20.PrepareGitActions.md)
+
+** Step 21: Deploy to Production Server from GitHub to VPS**  
+Deploy your application from GitHub to your VPS:  
+👉 [Deploy to Production Server from GitHub to VPS](./instructions/21.PrepareDockerFilesForProduction.md)
+
 ---
 
 ## Project Structure

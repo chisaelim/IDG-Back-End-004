@@ -39,7 +39,7 @@ COPY . /var/www/html
 WORKDIR /var/www/html
 
 RUN chown -R www-data:www-data /var/www/html/storage 
-RUN chown -R www-data:www-data /var/www/html/bootstrap/cache /var/www/html/public
+RUN chown -R www-data:www-data /var/www/html/bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html/public
 RUN chmod +x /var/www/html/*.sh && \
     chown www-data:www-data /var/www/html/*.sh
