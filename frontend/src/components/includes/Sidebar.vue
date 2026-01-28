@@ -75,8 +75,8 @@
               <p>Dashboard</p>
             </router-link>
           </li>
-          <li class="nav-header">More</li>
-          <li class="nav-item">
+          <li v-if="userData.level === 'admin'" class="nav-header">More</li>
+          <li v-if="userData.level === 'admin'" class="nav-item">
             <router-link :to="{ name: 'backups' }" class="nav-link" active-class="active">
               <i class="nav-icon fas fa-database"></i>
               <p>Backups</p>
@@ -90,4 +90,8 @@
 <script setup>
 import logoImg from "admin-lte/dist/img/AdminLTELogo.png";
 import profilePic from "admin-lte/dist/img/user4-128x128.jpg";
+import { useStore } from "vuex";
+import { computed } from "vue";
+const store = useStore();
+const userData = computed(() => store.state.user);
 </script>
