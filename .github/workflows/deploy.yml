@@ -38,6 +38,8 @@ jobs:
             cd ~/ultralink.cloud/frontend
             docker compose -f docker-compose.prod.yml down || true
             docker compose -f docker-compose.prod.yml up -d --build
+
+
             # Install nginx if not installed
             sudo apt update && sudo apt install -y nginx
 
