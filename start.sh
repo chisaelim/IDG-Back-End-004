@@ -1,5 +1,6 @@
 chown -R www-data:www-data /var/www/html/bootstrap/cache
 chown -R www-data:www-data /var/www/html/storage
+chown -R www-data:www-data /var/www/html/storage/app
 
 # Install dependencies without production optimizations
 composer install &
