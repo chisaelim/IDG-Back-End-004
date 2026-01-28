@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Chat;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,7 @@ class CreateChatRequest extends FormRequest
                 Rule::requiredIf(fn() => $this->input('type') === 'group')
             ],
             'type' => ['required', 'string', Rule::in(['personal', 'group'])],
-            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids' => ['required', 'array', 'min:1', Rule::when($this->input('type') === 'personal', ['max:1'])],
             'user_ids.*' => ['required', 'integer', 'exists:users,id', 'distinct'],
         ];
     }
@@ -37,13 +38,12 @@ class CreateChatRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
+    public function withValidator(Validator $validator)
     {
-        // For personal chat, ensure only one member is provided
-        if ($this->input('type') === 'personal' && is_array($this->input('user_ids'))) {
-            $this->merge([
-                'user_ids' => array_slice($this->input('user_ids'), 0, 1)
-            ]);
-        }
+        $validator->after(function ($validator) {
+            if ($this->user()->id === $this->input('user_ids')[0]) {
+                $validator->errors()->add('user_ids', 'You cannot create a personal chat with yourself.');
+            }
+        });
     }
 }
