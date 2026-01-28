@@ -1,6 +1,6 @@
 name: CI/CD pipeline
 env:
-  NGINX_CONFIG: example.cloud
+  NGINX_CONFIG: ultralink.cloud
 on:
   push:
     branches: [practice]
@@ -42,7 +42,7 @@ jobs:
             sudo apt update && sudo apt install -y nginx
 
             # Overwrite nginx config file
-            sudo cp ~/example.cloud/${{ env.NGINX_CONFIG }} /etc/nginx/sites-available/${{ env.NGINX_CONFIG }}
+            sudo cp ~/ultralink.cloud/${{ env.NGINX_CONFIG }} /etc/nginx/sites-available/${{ env.NGINX_CONFIG }}
             sudo ln -sf /etc/nginx/sites-available/${{ env.NGINX_CONFIG }} /etc/nginx/sites-enabled/
             sudo rm -f /etc/nginx/sites-enabled/default
 

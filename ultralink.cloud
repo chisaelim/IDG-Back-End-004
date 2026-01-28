@@ -3,11 +3,11 @@
 # Main HTTPS server
 server {
     listen 443 ssl http2;
-    server_name example.cloud www.example.cloud;
+    server_name ultralink.cloud www.ultralink.cloud;
 
     # SSL files
-    ssl_certificate /etc/letsencrypt/live/example.cloud/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/example.cloud/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/ultralink.cloud/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ultralink.cloud/privkey.pem;
 
     location /api/ {
         proxy_pass http://localhost:8000;
@@ -51,7 +51,7 @@ server {
 # Redirect HTTP to HTTPS
 server {
     listen 80;
-    server_name example.cloud www.example.cloud;
+    server_name ultralink.cloud www.ultralink.cloud;
     return 301 https://$host$request_uri;
 }
 
