@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+chown -R www-data:www-data /var/www/html/storage 
+chown -R www-data:www-data /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/public
+
 # Install dependencies without production optimizations
 composer install
 # npm install
