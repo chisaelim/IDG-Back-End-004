@@ -1,9 +1,12 @@
 #!/bin/bash
 set -e
 
-chown -R www-data:www-data /var/www/html/storage 
-chown -R www-data:www-data /var/www/html/bootstrap/cache
 chown -R www-data:www-data /var/www/html/public
+chown -R www-data:www-data /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage
+chown -R www-data:www-data /var/www/html/storage/app
+chown -R www-data:www-data /var/www/html/storage/app/public
+chown -R www-data:www-data /var/www/html/storage/app/private
 
 # Install dependencies without production optimizations
 composer install
