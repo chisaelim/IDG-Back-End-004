@@ -14,10 +14,14 @@
       <router-link :to="{ name: 'profile' }">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
           <div class="image">
-            <img :src="profilePic" class="img-circle elevation-2" alt="User Image" />
+            <img
+              :src="userData.photo || emptyPhoto"
+              class="img-circle elevation-2"
+              alt="User Image"
+            />
           </div>
           <div class="info">
-            <a href="#" class="d-block">Nina Mcintire</a>
+            <a href="#" class="d-block">{{ userData.name }}</a>
           </div>
         </div>
       </router-link>
@@ -89,7 +93,8 @@
 </template>
 <script setup>
 import logoImg from "admin-lte/dist/img/AdminLTELogo.png";
-import profilePic from "admin-lte/dist/img/user4-128x128.jpg";
+import emptyPhoto from "@assets/images/emptyPhoto.png";
+
 import { useStore } from "vuex";
 import { computed } from "vue";
 const store = useStore();
