@@ -16,13 +16,13 @@ services:
       VITE_HMR_PORT: 5173
       VITE_API_URL: http://localhost:8000/api
 
-  vue-production:
-    build:
-      context: .
-      target: production
-      args:
-        VITE_API_URL: http://localhost:8000/api
-    image: my-front-production:latest
-    container_name: my-front-production-container
-    ports:
-      - 3000:80
+  # vue-production:
+  #   build:
+  #     context: .
+  #     target: production
+  #     args:
+  #       VITE_API_URL: http://localhost:8000/api
+  #   image: my-front-production:latest
+  #   container_name: my-front-production-container
+  #   ports:
+  #     - 3000:80
