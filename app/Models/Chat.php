@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Chat extends Model
 {
@@ -14,6 +15,17 @@ class Chat extends Model
         'name',
         'type',
     ];
+
+    protected function scopeWithChatResourceEagerLoads(Builder $query, $user): void
+    {
+        $query->with(['messages' => function ($query) {
+            $query->latest()->limit(1)->with('user');
+        }])
+            ->withCount(['messages as unread_count' => function ($query) use ($user) {
+                $query->where('user_id', '<>', $user->id)
+                    ->whereNull('seen_at');
+            }]);
+    }
 
     public function messages()
     {

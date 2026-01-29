@@ -5,15 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ChatMember extends Model
+class ChatMessage extends Model
 {
     use HasFactory;
-    protected $table = 'chat_members';
+    protected $table = 'chat_messages';
     protected $primaryKey = 'id';
+    protected $casts = [
+        'seen_at' => 'datetime',
+    ];
     protected $fillable = [
-        'role',
-        'chat_id',
+        'content',
+        'type',
+        'id_chat',
         'user_id',
+        'seen_at'
     ];
 
     public function chat()
