@@ -18,16 +18,7 @@ class ChatMessageController extends Controller
     {
         $user = $request->user();
 
-        // Verify user is member of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not a member'
-            ], 404);
-        }
+        $user->isChatMember($chatId);
 
         $messages = ChatMessage::where('chat_id', $chatId)
             ->with('user')
@@ -49,16 +40,7 @@ class ChatMessageController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        // Verify user is member of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not a member'
-            ], 404);
-        }
+        $user->isChatMember($chatId);
 
         try {
             DB::beginTransaction();
@@ -84,16 +66,7 @@ class ChatMessageController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
-        $message = ChatMessage::where('id', $messageId)
-            ->where('chat_id', $chatId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$message) {
-            return response([
-                'message' => 'Message not found or you cannot edit this message'
-            ], 404);
-        }
+        $message = $user->hasMessageInChat($messageId, $chatId);
         if ($message->type !== 'text') {
             return response([
                 'message' => 'Only text messages can be edited'
@@ -118,15 +91,7 @@ class ChatMessageController extends Controller
     {
         $user = $request->user();
 
-        $message = ChatMessage::where('id', $messageId)
-            ->where('chat_id', $chatId)
-            ->where('user_id', $user->id)
-            ->first();
-        if (!$message) {
-            return response([
-                'message' => 'Message not found or you cannot delete this message'
-            ], 404);
-        }
+        $message = $user->hasMessageInChat($messageId, $chatId);
         try {
             DB::beginTransaction();
             $message->delete();
@@ -143,16 +108,7 @@ class ChatMessageController extends Controller
     {
         $user = $request->user();
 
-        // Verify user is member of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not a member'
-            ], 404);
-        }
+        $user->isChatMember($chatId);
 
         $message = ChatMessage::where('id', $messageId)
             ->where('chat_id', $chatId)
@@ -182,16 +138,7 @@ class ChatMessageController extends Controller
     {
         $user = $request->user();
 
-        // Verify user is member of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not a member'
-            ], 404);
-        }
+        $user->isChatMember($chatId);
         try {
             DB::beginTransaction();
             $updatedCount = ChatMessage::where('chat_id', $chatId)

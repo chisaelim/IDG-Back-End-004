@@ -18,16 +18,7 @@ class ChatMemberController extends Controller
     {
         $user = $request->user();
 
-        // Verify user is member of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not a member'
-            ], 404);
-        }
+        $user->isChatMember($chatId);
 
         $members = ChatMember::where('chat_id', $chatId)
             ->with('user')
@@ -42,16 +33,8 @@ class ChatMemberController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        // Verify user is admin of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id)->where('role', 'admin');
-        })->find($chatId);
+        $chat = $user->hasChatAsAdmin($chatId);
 
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not an admin'
-            ], 403);
-        }
 
         if ($chat->type === 'personal') {
             return response([
@@ -81,26 +64,8 @@ class ChatMemberController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
-        // Verify user is admin of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id)->where('role', 'admin');
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not an admin'
-            ], 403);
-        }
-
-        $member = ChatMember::where('user_id', $memberId)
-            ->where('chat_id', $chatId)
-            ->first();
-
-        if (!$member) {
-            return response([
-                'message' => 'Member not found'
-            ], 404);
-        }
+        $chat = $user->hasChatAsAdmin($chatId);
+        $member = $chat->hasMember($memberId);
 
         // Prevent changing own role
         if ($member->user_id === $user->id) {
@@ -125,27 +90,8 @@ class ChatMemberController extends Controller
     public function removeMember(Request $request, int $chatId, int $memberId)
     {
         $user = $request->user();
-
-        // Verify user is admin of this chat
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id)->where('role', 'admin');
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not an admin'
-            ], 403);
-        }
-
-        $member = ChatMember::where('user_id', $memberId)
-            ->where('chat_id', $chatId)
-            ->first();
-
-        if (!$member) {
-            return response([
-                'message' => 'Member not found'
-            ], 404);
-        }
+        $chat = $user->hasChatAsAdmin($chatId);
+        $member = $chat->hasMember($memberId);
 
         // Prevent removing self
         if ($member->user_id === $user->id) {

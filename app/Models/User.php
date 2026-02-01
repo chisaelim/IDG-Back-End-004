@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class User extends Authenticatable implements MustVerifyEmailContract
 {
@@ -79,5 +80,68 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPassword($token));
+    }
+
+    public function members()
+    {
+        return $this->hasMany(ChatMember::class);
+    }
+
+    public function chats()
+    {
+        return $this->belongsToMany(Chat::class, 'chat_members')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(ChatMessage::class);
+    }
+
+    public function hasChatAsAdmin($chatId): Chat
+    {
+        $chat = $this->chats()
+            ->where('chat_id', $chatId)
+            ->wherePivot('role', 'admin')
+            ->first();
+        if (!$chat) {
+            throw new ModelNotFoundException('Chat not found or user is not an admin.');
+        }
+        return $chat;
+    }
+
+    public function hasChat($chatId) : Chat
+    {
+        $chat = $this->chats()
+            ->where('chat_id', $chatId)
+            ->first();
+        if (!$chat) {
+            throw new ModelNotFoundException('Chat not found.');
+        }
+        return $chat;
+    }
+
+    public function isChatMember($chatId) : ChatMember
+    {
+        $member = $this->members()
+            ->where('chat_id', $chatId)
+            ->first();
+        if (!$member) {
+            throw new ModelNotFoundException('You are not a member of this chat.');
+        }
+        return $member;
+    }
+
+    public function hasMessageInChat($messageId, $chatId) : ChatMessage
+    {
+        $message = $this->messages()
+            ->where('id', $messageId)
+            ->where('chat_id', $chatId)
+            ->first();
+        if (!$message) {
+            throw new ModelNotFoundException('Chat message not found.');
+        }
+        return $message;
     }
 }

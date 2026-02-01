@@ -149,7 +149,7 @@ Implement role-based access control to restrict certain features to admin users 
 👉 [Create Custom Middleware for Role-Based Access Control](./instructions/17.CreateCustomMiddleware.md)
 
 ** Step 18: Verify Local Docker files and prepare for production copy**  
-Ensure your Docker files are ready to be copied from local to production:
+Ensure your Docker files are ready to be copied from local to production:  
 👉 [Verify Local Docker files and prepare for production copy](./instructions/18.VerifyLocalDockerFiles.md)
 
 ** Step 19: VPS configuration and Docker installation**  
@@ -168,7 +168,7 @@ Deploy your application from GitHub to your VPS:
 Automate Nginx configuration deployment and integrate phpMyAdmin:  
 👉 [Automated Nginx Deployment with phpMyAdmin Integration](./instructions/22.AutomateNginxConfig.md)
 
-** Step 23: Prepare Database for Chat Functionality**
+** Step 23: Prepare Database for Chat Functionality**  
 Set up your database schema and migrations for chat features:  
 👉 [Prepare Database for Chat Functionality](./instructions/23.PrepareDatabaseForChat.md)
 
@@ -179,6 +179,10 @@ Create sample data to test your chat functionality:
 ** Step 25: Implement Api Chat Endpoints in Laravel**  
 Develop API endpoints to support chat features in your Laravel application:  
 👉 [Implement Api Chat Endpoints in Laravel](./instructions/25.ImplementApiChatEndpoints.md)
+
+** Step 26: Implement Reusable MVC Pattern**  
+Adopt a reusable MVC pattern for better code organization and maintainability:  
+👉 [Implement Reusable MVC Pattern](./instructions/26.ImplementReusableMVCPattern.md)
 
 ---
 

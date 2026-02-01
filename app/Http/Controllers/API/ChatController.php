@@ -22,13 +22,7 @@ class ChatController extends Controller
             $query->where('user_id', $user->id);
         })
             ->has('messages')
-            ->with(['messages' => function ($query) {
-                $query->latest()->limit(1)->with('user');
-            }])
-            ->withCount(['messages as unread_count' => function ($query) use ($user) {
-                $query->where('user_id', '<>', $user->id)
-                    ->whereNull('seen_at');
-            }])
+            ->withDefault($user)
             ->orderByDesc(DB::raw('(SELECT MAX(created_at) FROM chat_messages WHERE chat_messages.chat_id = chats.id)'))
             ->paginate($request->get('per_page', 15));
 
@@ -55,13 +49,7 @@ class ChatController extends Controller
                 ->whereHas('members', function ($query) use ($data) {
                     $query->where('user_id', $data['user_ids'][0]);
                 })
-                ->with(['messages' => function ($query) {
-                    $query->latest()->limit(1)->with('user');
-                }])
-                ->withCount(['messages as unread_count' => function ($query) use ($user) {
-                    $query->where('user_id', '<>', $user->id)
-                        ->whereNull('seen_at');
-                }])
+                ->withDefault($user)
                 ->first();
             if ($exists) {
                 return response([
@@ -102,13 +90,7 @@ class ChatController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
-        $chat->load(['messages' => function ($query) {
-            $query->latest()->limit(1)->with('user');
-        }]);
-        $chat->loadCount(['messages as unread_count' => function ($query) use ($user) {
-            $query->where('user_id', '<>', $user->id)
-                ->whereNull('seen_at');
-        }]);
+        $chat->loadDefault($user);
         return response([
             'message' => 'Chat created successfully',
             'data' => new ChatResource($chat)
@@ -121,13 +103,7 @@ class ChatController extends Controller
         $chat = Chat::whereHas('members', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-            ->with(['messages' => function ($query) {
-                $query->latest()->limit(1)->with('user');
-            }])
-            ->withCount(['messages as unread_count' => function ($query) use ($user) {
-                $query->where('user_id', '<>', $user->id)
-                    ->whereNull('seen_at');
-            }])
+            ->withDefault($user)
             ->find($chatId);
 
         if (!$chat) {
@@ -144,38 +120,24 @@ class ChatController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id)->where('role', 'admin');
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not an admin'
-            ], 403);
-        }
-
+        $chat = $user->hasChatAsAdmin($chatId);
         if ($chat->type === 'personal') {
             return response([
                 'message' => 'Cannot update personal chat'
             ], 400);
         }
-
+        
         try {
             DB::beginTransaction();
             $chat->update($data);
             DB::commit();
             $chat->refresh();
-            $chat->load(['messages' => function ($query) {
-                $query->latest()->limit(1)->with('user');
-            }]);
-            $chat->loadCount(['messages as unread_count' => function ($query) use ($user) {
-                $query->where('user_id', '<>', $user->id)
-                    ->whereNull('seen_at');
-            }]);
         } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+
+        $chat->loadDefault($user);
         return response([
             'message' => 'Chat updated successfully',
             'data' => new ChatResource($chat)
@@ -185,16 +147,7 @@ class ChatController extends Controller
     {
         $user = $request->user();
 
-        $chat = Chat::whereHas('members', function ($query) use ($user) {
-            $query->where('user_id', $user->id)->where('role', 'admin');
-        })->find($chatId);
-
-        if (!$chat) {
-            return response([
-                'message' => 'Chat not found or you are not an admin'
-            ], 403);
-        }
-
+        $chat = $user->hasChatAsAdmin($chatId);
         try {
             DB::beginTransaction();
 
@@ -219,17 +172,7 @@ class ChatController extends Controller
     public function leaveGroupChat(Request $request, int $chatId)
     {
         $user = $request->user();
-
-        $member = ChatMember::where('chat_id', $chatId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$member) {
-            return response([
-                'message' => 'You are not a member of this chat'
-            ], 404);
-        }
-
+        $member = $user->isChatMember($chatId);
         try {
             DB::beginTransaction();
 
