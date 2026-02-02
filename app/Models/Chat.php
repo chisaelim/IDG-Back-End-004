@@ -20,8 +20,8 @@ class Chat extends Model
     protected function scopeWithDefault(Builder $query, $user): void
     {
         $query->with(['messages' => function ($query) {
-                $query->latest()->limit(1)->with('user');
-            }])
+            $query->latest()->limit(1)->with('user');
+        }])
             ->withCount(['messages as unread_count' => function ($query) use ($user) {
                 $query->where('user_id', '<>', $user->id)
                     ->whereNull('seen_at');
@@ -33,12 +33,12 @@ class Chat extends Model
         $this->load(['messages' => function ($query) {
             $query->latest()->limit(1)->with('user');
         }]);
-        
+
         $this->loadCount(['messages as unread_count' => function ($query) use ($user) {
             $query->where('user_id', '<>', $user->id)
                 ->whereNull('seen_at');
         }]);
-        
+
         return $this;
     }
 
@@ -66,7 +66,12 @@ class Chat extends Model
         return $this->hasManyThrough(User::class, ChatMember::class, 'chat_id', 'id', 'id', 'user_id');
     }
 
-    public function hasMember($memberId) : ChatMember
+    public function mainAdmin(): ChatMember
+    {
+        return $this->members()->where('role', 'admin')->orderBy('created_at', 'asc')->first();
+    }
+
+    public function hasMember($memberId): ChatMember
     {
         $member = $this->members()
             ->where('user_id', $memberId)

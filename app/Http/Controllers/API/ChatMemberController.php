@@ -35,7 +35,6 @@ class ChatMemberController extends Controller
 
         $chat = $user->hasChatAsAdmin($chatId);
 
-
         if ($chat->type === 'personal') {
             return response([
                 'message' => 'Cannot add members to personal chat'
@@ -71,6 +70,12 @@ class ChatMemberController extends Controller
         if ($member->user_id === $user->id) {
             return response([
                 'message' => 'You cannot change your own role'
+            ], 400);
+        }
+        // prevent update on main admin
+        if ($member->user_id === $chat->mainAdmin()->id) {
+            return response([
+                'message' => 'You cannot change the role of the main admin'
             ], 400);
         }
         try {
