@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use Exception;
 use App\Models\Chat;
 use App\Models\ChatMember;
+use App\Traits\UploadMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ChatResource;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Chat\CreateChatRequest;
 use App\Http\Requests\Chat\UpdateChatRequest;
 
@@ -17,11 +19,14 @@ class ChatController extends Controller
     public function getChats(Request $request)
     {
         $user = $request->user();
+        $search = $request->get('search');
 
         $chats = Chat::whereHas('members', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-            ->has('messages')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
             ->withDefault($user)
             ->orderByDesc(DB::raw('(SELECT MAX(created_at) FROM chat_messages WHERE chat_messages.chat_id = chats.id)'))
             ->paginate($request->get('per_page', 15));
@@ -62,9 +67,15 @@ class ChatController extends Controller
             DB::beginTransaction();
             // Create chat
             $chat = Chat::create([
-                'name' => $data['name'],
+                'name' => $data['name'] ?? null,
                 'type' => $data['type'],
             ]);
+
+            if ($data['type'] === 'group' && isset($data['photo'])) {
+                // Store group chat photo
+                $chat->photo = UploadMethod::storeImage($data['photo'], "chats/{$chat->id}/images", true);
+                $chat->save();
+            }
 
             // Add creator as admin
             ChatMember::create([
@@ -93,7 +104,7 @@ class ChatController extends Controller
         $chat->loadDefault($user);
         return response([
             'message' => 'Chat created successfully',
-            'data' => new ChatResource($chat)
+            'chat' => new ChatResource($chat)
         ], 201);
     }
     public function readChat(Request $request, int $chatId)
@@ -113,7 +124,7 @@ class ChatController extends Controller
         }
 
         return response([
-            'data' => new ChatResource($chat)
+            'chat' => new ChatResource($chat)
         ], 200);
     }
     public function updateGroupChat(UpdateChatRequest $request, int $chatId)
@@ -126,9 +137,15 @@ class ChatController extends Controller
                 'message' => 'Cannot update personal chat'
             ], 400);
         }
-        
+
         try {
             DB::beginTransaction();
+            if (array_key_exists('photo', $data)) {
+                UploadMethod::discardImage($chat->getRawOriginal('photo'), "chats/{$chat->id}/images", true);
+                if (!empty($data['photo'])) {
+                    $data['photo'] = UploadMethod::storeImage($data['photo'], "chats/{$chat->id}/images", true);
+                }
+            }
             $chat->update($data);
             DB::commit();
             $chat->refresh();
@@ -140,7 +157,7 @@ class ChatController extends Controller
         $chat->loadDefault($user);
         return response([
             'message' => 'Chat updated successfully',
-            'data' => new ChatResource($chat)
+            'chat' => new ChatResource($chat)
         ]);
     }
     public function deleteGroupChat(Request $request, int $chatId)
@@ -205,5 +222,26 @@ class ChatController extends Controller
         return response([
             'message' => 'Left chat successfully'
         ]);
+    }
+    function readChatFile(Request $request, int $chatId, string $folder, string $filename)
+    {
+        $user = $request->user();
+        $user->isChatMember($chatId);
+
+        $disk = Storage::disk('local');
+
+        $filePath = "chats/{$chatId}/{$folder}/{$filename}";
+
+        if (!$disk->exists($filePath)) {
+            return response([
+                'message' => 'File not found.'
+            ], 404);
+        }
+
+        $mimeType = $disk->mimeType($filePath);
+        $content = $disk->get($filePath);
+
+        return response($content)
+            ->header('Content-Type', $mimeType);
     }
 }

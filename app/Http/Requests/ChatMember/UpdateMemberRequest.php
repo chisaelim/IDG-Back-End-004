@@ -5,7 +5,7 @@ namespace App\Http\Requests\ChatMember;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateMemberRoleRequest extends FormRequest
+class UpdateMemberRequest extends FormRequest
 {
     public function authorize(): bool
     {

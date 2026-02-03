@@ -13,7 +13,7 @@ use Intervention\Image\Decoders\DataUriImageDecoder;
 
 trait UploadMethod
 {
-    public static function storeImage($image, $folder_name)
+    public static function storeImage($image, $folder_name, $private = false)
     {
         try {
             $image_name = 'IMG-' . uniqid() . '.png';
@@ -24,8 +24,12 @@ trait UploadMethod
             ]);
 
             $encoded = $processedImage->toPng();
+
+            // Choose disk based on $private flag
+            $disk = $private ? 'local' : 'public';
+
             // Save image
-            Storage::disk('public')->put(
+            Storage::disk($disk)->put(
                 "$folder_name/$image_name",
                 $encoded
             );
@@ -38,12 +42,13 @@ trait UploadMethod
         }
     }
 
-    public static function discardImage($image_name, $folder_name)
+    public static function discardImage($image_name, $folder_name, $private = false)
     {
         try {
             // Delete from storage/app/public/{folder_name}
-            if (Storage::disk('public')->exists("$folder_name/$image_name")) {
-                Storage::disk('public')->delete("$folder_name/$image_name");
+            $disk = $private ? 'local' : 'public';
+            if (Storage::disk($disk)->exists("$folder_name/$image_name")) {
+                Storage::disk($disk)->delete("$folder_name/$image_name");
             }
             return true;
         } catch (Exception $e) {

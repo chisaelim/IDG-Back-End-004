@@ -10,22 +10,36 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ChatMemberResource;
 use App\Http\Requests\ChatMember\AddMemberRequest;
-use App\Http\Requests\ChatMember\UpdateMemberRoleRequest;
+use App\Http\Requests\ChatMember\UpdateMemberRequest;
 
 class ChatMemberController extends Controller
 {
     public function getMembers(Request $request, int $chatId)
     {
         $user = $request->user();
+        $search = $request->get('search');
 
         $user->isChatMember($chatId);
 
         $members = ChatMember::where('chat_id', $chatId)
+            ->where('user_id', '<>', $user->id)
+            ->when($search, function ($query, $search) {
+                $query->whereHas('user', function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
             ->with('user')
-            ->get();
+            ->paginate($request->get('per_page', 15));
 
         return response([
-            'data' => ChatMemberResource::collection($members)
+            'chat_members' => ChatMemberResource::collection($members),
+            'meta' => [
+                'current_page' => $members->currentPage(),
+                'last_page' => $members->lastPage(),
+                'per_page' => $members->perPage(),
+                'total' => $members->total(),
+            ]
         ]);
     }
     public function addMember(AddMemberRequest $request, int $chatId)
@@ -56,10 +70,10 @@ class ChatMemberController extends Controller
         }
         return response([
             'message' => 'Member added successfully',
-            'data' => new ChatMemberResource($member->load('user'))
+            'chat_member' => new ChatMemberResource($member->load('user'))
         ], 201);
     }
-    public function updateMember(UpdateMemberRoleRequest $request, int $chatId, int $memberId)
+    public function updateMember(UpdateMemberRequest $request, int $chatId, int $memberId)
     {
         $user = $request->user();
         $data = $request->validated();
@@ -89,7 +103,7 @@ class ChatMemberController extends Controller
         return response([
 
             'message' => 'Member role updated successfully',
-            'data' => new ChatMemberResource($member->load('user'))
+            'chat_member' => new ChatMemberResource($member->load('user'))
         ]);
     }
     public function removeMember(Request $request, int $chatId, int $memberId)
@@ -113,7 +127,6 @@ class ChatMemberController extends Controller
             throw new Exception($e->getMessage());
         }
         return response([
-
             'message' => 'Member removed successfully'
         ]);
     }

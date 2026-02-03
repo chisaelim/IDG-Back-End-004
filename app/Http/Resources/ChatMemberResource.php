@@ -16,11 +16,7 @@ class ChatMemberResource extends JsonResource
             'user_id' => $this->user_id,
             'joined_at' => $this->created_at,
             'user' => $this->whenLoaded('user', function () {
-                return [
-                    'id' => $this->user->id,
-                    'name' => $this->user->name,
-                    'email' => $this->user->email,
-                ];
+                return $this->user ? new UserResource($this->user) : null;
             }),
         ];
     }

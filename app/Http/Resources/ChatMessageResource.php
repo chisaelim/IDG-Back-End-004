@@ -19,11 +19,7 @@ class ChatMessageResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'user' => $this->whenLoaded('user', function () {
-                return [
-                    'id' => $this->user->id,
-                    'name' => $this->user->name,
-                    'email' => $this->user->email,
-                ];
+                return $this->user ? new UserResource($this->user) : null;
             }),
             // Flag if message is from current user
             'own_message' => $this->user_id === $request->user()->id,

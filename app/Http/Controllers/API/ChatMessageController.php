@@ -17,16 +17,21 @@ class ChatMessageController extends Controller
     public function getMessages(Request $request, int $chatId)
     {
         $user = $request->user();
+        $search = $request->get('search');
 
         $user->isChatMember($chatId);
 
         $messages = ChatMessage::where('chat_id', $chatId)
+            ->when($search, function ($query, $search) {
+                $query->where('type', 'text')
+                    ->where('content', 'like', "%{$search}%");
+            })
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 50));
 
         return response([
-            'messages' => ChatMessageResource::collection($messages),
+            'chat_messages' => ChatMessageResource::collection($messages),
             'meta' => [
                 'current_page' => $messages->currentPage(),
                 'last_page' => $messages->lastPage(),
@@ -59,7 +64,7 @@ class ChatMessageController extends Controller
         }
         return response([
             'message' => 'Message sent successfully',
-            'data' => new ChatMessageResource($message->load('user'))
+            'chat_message' => new ChatMessageResource($message->load('user'))
         ], 201);
     }
     public function updateMessage(UpdateMessageRequest $request, int $chatId, int $messageId)
@@ -84,7 +89,7 @@ class ChatMessageController extends Controller
         return response([
 
             'message' => 'Message updated successfully',
-            'data' => new ChatMessageResource($message->load('user'))
+            'chat_message' => new ChatMessageResource($message->load('user'))
         ]);
     }
     public function deleteMessage(Request $request, int $chatId, int $messageId)
@@ -131,7 +136,7 @@ class ChatMessageController extends Controller
         }
         return response([
             'message' => 'Message marked as seen',
-            'data' => new ChatMessageResource($message->load('user'))
+            'chat_message' => new ChatMessageResource($message->load('user'))
         ]);
     }
     public function markAllMessagesAsSeen(Request $request, int $chatId)
@@ -151,11 +156,7 @@ class ChatMessageController extends Controller
             throw new Exception($e->getMessage());
         }
         return response([
-
             'message' => 'All messages marked as seen',
-            'data' => [
-                'updated_count' => $updatedCount
-            ]
         ]);
     }
 }

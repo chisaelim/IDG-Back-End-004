@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\API\BackupController;
 use App\Http\Controllers\API\ChatController;
-use App\Http\Controllers\API\ChatMessageController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\BackupController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\API\ChatMemberController;
+use App\Http\Controllers\API\ChatMessageController;
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/signin', [AuthController::class, 'signin']);
@@ -35,15 +36,21 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
+    // User API Routes
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'getUsers']);
+    });
     // Chat API Routes
     Route::prefix('chats')->group(function () {
         // Chat management
         Route::get('/', [ChatController::class, 'getChats']);
         Route::post('/create', [ChatController::class, 'createChat']);
         Route::get('/read/{chatId}', [ChatController::class, 'readChat']);
-        Route::patch('update/{chatId}', [ChatController::class, 'updateGroupChat']);
-        Route::delete('delete/{chatId}', [ChatController::class, 'deleteGroupChat']);
-        Route::post('leave/{chatId}', [ChatController::class, 'leaveGroupChat']);
+        Route::patch('/update/{chatId}', [ChatController::class, 'updateGroupChat']);
+        Route::delete('/delete/{chatId}', [ChatController::class, 'deleteGroupChat']);
+        Route::post('/leave/{chatId}', [ChatController::class, 'leaveGroupChat']);
+        Route::get('/read/{chatId}/{folder}/{filename}', [ChatController::class, 'readChatFile']);
+
 
         // Chat messages
         Route::get('/{chatId}/messages', [ChatMessageController::class, 'getMessages']);
