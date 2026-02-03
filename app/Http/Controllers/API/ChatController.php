@@ -59,7 +59,7 @@ class ChatController extends Controller
             if ($exists) {
                 return response([
                     'message' => 'Chat already exists',
-                    'data' => new ChatResource($exists)
+                    'chat' => new ChatResource($exists)
                 ], 200);
             }
         }
