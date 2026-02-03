@@ -29,7 +29,7 @@ class Chat extends Model
                     return $hasPhoto ? asset('storage/profile/' . $other->getRawOriginal('photo')) : null;
                 }
                 if ($value) {
-                    return env('APP_URL') . "/api/chats/{$this->id}/images/" . $value;
+                    return env('APP_URL') . "/api/chats/read/{$this->id}/images/" . $value;
                 }
                 return null;
             }
