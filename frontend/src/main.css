@@ -2,3 +2,59 @@
 @import 'admin-lte/plugins/fontawesome-free/css/all.min.css';
 @import 'admin-lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css';
 @import 'admin-lte/dist/css/adminlte.min.css';
+
+.nav-item p.chat-name {
+    position: absolute;
+    left: 55px;
+    top: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 125px;
+    /* or any specific width/max-width */
+    display: inline-block;
+    /* or inline-block */
+}
+
+.nav-item p.chat-datetime {
+    font-size: 0.75rem;
+    position: absolute;
+    right: 5px;
+    top: 2px;
+}
+
+.nav-item p.chat-message {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 185px;
+    /* or any specific width/max-width */
+    display: inline-block;
+    /* or inline-block */
+}
+
+.nav-item p.chat-activity-icon {
+    font-size: 1rem;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    animation: blinker 1.5s linear infinite;
+}
+
+@keyframes blinker {
+    0% {
+        opacity: 1;
+        /* Fully visible */
+    }
+
+    50% {
+        opacity: 0;
+        /* Hidden */
+    }
+
+    100% {
+        opacity: 1;
+        /* Fully visible, optional if infinite is used */
+    }
+}

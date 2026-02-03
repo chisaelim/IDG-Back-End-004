@@ -15,6 +15,8 @@ import Navbar from '@com/includes/Navbar.vue';
 import Footer from '@com/includes/Footer.vue';
 import Sidebar from '@com/includes/Sidebar.vue';
 
+import ChatBox from '@com/pages/ChatBox.vue';
+
 import { useStore } from 'vuex';
 function authorize(roles) {
   return (to, from, next) => {
@@ -110,6 +112,15 @@ const router = createRouter({
       },
       meta: { guard: true },
       beforeEnter: authorize(['admin'])
+    },
+    {
+      path: '/chats/:chatId',
+      name: 'chats',
+      components: {
+        default: ChatBox,
+        ...includes,
+      },
+      meta: { guard: true },
     },
   ],
 })
