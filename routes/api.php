@@ -4,9 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\API\BackupController;
-use App\Http\Controllers\Api\ChatController;
-use App\Http\Controllers\Api\ChatMessageController;
-use App\Http\Controllers\Api\ChatMemberController;
+use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\API\ChatMessageController;
+use App\Http\Controllers\API\ChatMemberController;
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/signin', [AuthController::class, 'signin']);
