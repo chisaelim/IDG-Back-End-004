@@ -9,10 +9,14 @@ class ChatResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $other = null;
+        if ($this->type === 'personal' && $this->relationLoaded('users')) {
+            $other = $this->users->where('id', '<>', $request->user()->id)->first();
+        }
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'photo' => $this->photo,
+            'name' => $this->type === 'personal' && $other ? $other->name : $this->name,
+            'photo' => $this->type === 'personal' && $other ? $other->photo : $this->photo,
             'type' => $this->type,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

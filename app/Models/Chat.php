@@ -21,41 +21,20 @@ class Chat extends Model
 
     protected function Photo(): Attribute
     {
-        $other = $this->otherUser();
         return Attribute::make(
-            get: function (string|null $value) use ($other) {
-                if ($this->type === 'personal' && $other) {
-                    $hasPhoto = $other->getRawOriginal('photo');
-                    return $hasPhoto ? asset('storage/profile/' . $other->getRawOriginal('photo')) : null;
-                }
-                if ($value) {
-                    return env('APP_URL') . "/api/chats/read/{$this->id}/images/" . $value;
-                }
-                return null;
-            }
+            get: fn(string|null $value) => $value ? env('APP_URL') . "/api/chats/read/{$this->id}/images/$value" : null,
         );
-    }
-
-    protected function Name(): Attribute
-    {
-        $other = $this->otherUser();
-        return Attribute::make(
-            get: fn(string|null $value) => $value ? $value : ($other ? $other->name : 'Unnamed Chat')
-        );
-    }
-
-    public function otherUser(): User|null
-    {
-        return $this->users()
-            ->where('user_id', '<>', request()->user()->id)
-            ->first();
     }
 
     protected function scopeWithDefault(Builder $query, $user): void
     {
-        $query->with(['messages' => function ($query) {
-            $query->latest()->limit(1)->with('user');
-        }])
+        $query
+            ->with(['users' => function ($query) use ($user) {
+                $query->where('users.id', '<>', $user->id)->limit(1);
+            }])
+            ->with(['messages' => function ($query) {
+                $query->latest()->limit(1)->with('user');
+            }])
             ->withCount(['messages as unread_count' => function ($query) use ($user) {
                 $query->where('user_id', '<>', $user->id)
                     ->whereNull('seen_at');
@@ -64,14 +43,16 @@ class Chat extends Model
 
     public function loadDefault($user)
     {
-        $this->load(['messages' => function ($query) {
-            $query->latest()->limit(1)->with('user');
-        }]);
-
-        $this->loadCount(['messages as unread_count' => function ($query) use ($user) {
-            $query->where('user_id', '<>', $user->id)
-                ->whereNull('seen_at');
-        }]);
+        $this
+            ->load(['users' => function ($query) use ($user) {
+                $query->where('users.id', '<>', $user->id)->limit(1);
+            }])
+            ->load(['messages' => function ($query) {
+                $query->latest()->limit(1)->with('user');
+            }])->loadCount(['messages as unread_count' => function ($query) use ($user) {
+                $query->where('user_id', '<>', $user->id)
+                    ->whereNull('seen_at');
+            }]);
 
         return $this;
     }
