@@ -144,6 +144,7 @@ class ChatMessageController extends Controller
         $user = $request->user();
 
         $user->isChatMember($chatId);
+        
         try {
             DB::beginTransaction();
             $updatedCount = ChatMessage::where('chat_id', $chatId)

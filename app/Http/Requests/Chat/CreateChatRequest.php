@@ -41,6 +41,7 @@ class CreateChatRequest extends FormRequest
             'type.in' => 'Chat type must be either personal or group',
             'user_ids.required' => 'At least one member is required',
             'user_ids.*.exists' => 'One or more selected users do not exist',
+            'user_ids.*.distinct' => 'Duplicate user IDs are not allowed',
             'photo.base64image' => 'The photo must be a valid base64 encoded image.',
             'photo.base64mimes' => 'The photo must be a file of type: png, jpg, jpeg.',
             'photo.base64dimensions' => 'The photo must have dimensions of 454x454 pixels.',
