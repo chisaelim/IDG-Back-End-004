@@ -51,8 +51,11 @@ class CreateChatRequest extends FormRequest
     public function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
-            if ($this->user()->id === $this->input('user_ids')[0]) {
-                $validator->errors()->add('user_ids', 'You cannot create a personal chat with yourself.');
+            foreach ($this->input('user_ids', []) as $userId) {
+                if ($userId == $this->user()->id) {
+                    $validator->errors()->add('user_ids', 'You cannot add yourself to the chat.');
+                    break;
+                }
             }
         });
     }

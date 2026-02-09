@@ -7,6 +7,10 @@ window.Swal = Swal;
 import axios from 'axios';
 window.axios = axios;
 
+import jquery from 'jquery';
+window.$ = jquery;
+window.jQuery = jquery;
+
 window.API_URL = import.meta.env.VITE_API_URL;
 
 import { createApp } from 'vue';
