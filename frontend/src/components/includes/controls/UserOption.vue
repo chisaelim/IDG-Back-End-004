@@ -28,6 +28,7 @@ async function createPersonalChat() {
       type: "personal",
       user_ids: [props.user.id],
     });
+    window.dispatchEvent(new CustomEvent("chatCreated", { detail: response.data.chat }));
     router.push({ name: "chats", params: { chatId: response.data.chat.id } });
   } catch (error) {
     return MessageModal("error", "Error", error.response?.data?.message || error.message);

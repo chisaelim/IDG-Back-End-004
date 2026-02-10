@@ -136,6 +136,114 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Member Management (only for existing group chats) -->
+              <div v-if="chatId && chatData.type === 'group'" class="form-group mt-3">
+                <label>Members</label>
+
+                <!-- Add Member Search (admin only) -->
+                <div v-if="chatData.updatable" class="mb-2">
+                  <div class="input-group mb-2">
+                    <input
+                      v-model="memberSearchQuery"
+                      type="text"
+                      class="form-control"
+                      placeholder="Search users to add..."
+                    />
+                  </div>
+                  <div
+                    v-if="memberSearchQuery && availableMemberUsers.length"
+                    class="list-group mb-2"
+                    style="max-height: 150px; overflow-y: auto"
+                  >
+                    <a
+                      v-for="user in availableMemberUsers"
+                      :key="user.id"
+                      class="list-group-item list-group-item-action d-flex align-items-center"
+                      role="button"
+                      @click="addChatMember(user)"
+                    >
+                      <img
+                        :src="user.photo || emptyPhoto"
+                        class="img-circle mr-2"
+                        width="30"
+                        height="30"
+                      />
+                      <div>
+                        <strong>{{ user.name }}</strong>
+                        <small class="d-block text-muted">{{ user.email }}</small>
+                      </div>
+                    </a>
+                  </div>
+                  <div
+                    v-if="memberSearchQuery && !availableMemberUsers.length"
+                    class="text-muted small"
+                  >
+                    No users found.
+                  </div>
+                </div>
+
+                <!-- Existing Members List -->
+                <div
+                  class="list-group"
+                  style="max-height: 200px; overflow-y: auto"
+                >
+                  <div v-if="isLoadingMembers" class="text-center p-2">
+                    <i class="fas fa-spinner fa-spin"></i> Loading members...
+                  </div>
+                  <div
+                    v-for="member in chatMembers"
+                    :key="member.id"
+                    class="list-group-item d-flex align-items-center justify-content-between"
+                  >
+                    <div class="d-flex align-items-center">
+                      <img
+                        :src="member.user?.photo || emptyPhoto"
+                        class="img-circle mr-2"
+                        width="30"
+                        height="30"
+                      />
+                      <div>
+                        <strong>{{ member.user?.name }}</strong>
+                        <small class="d-block text-muted">{{ member.user?.email }}</small>
+                      </div>
+                      <span
+                        v-if="member.role === 'admin'"
+                        class="badge badge-info ml-2"
+                      >
+                        Admin
+                      </span>
+                    </div>
+                    <button
+                      v-if="chatData.updatable"
+                      @click="removeChatMember(member)"
+                      class="btn btn-danger btn-sm"
+                      title="Remove member"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <div
+                    v-if="!isLoadingMembers && !chatMembers.length"
+                    class="text-muted small text-center p-2"
+                  >
+                    No other members.
+                  </div>
+                </div>
+                <!-- Load More Members -->
+                <div
+                  v-if="memberMeta && memberMeta.current_page < memberMeta.last_page"
+                  class="text-center mt-2"
+                >
+                  <button
+                    @click="loadMoreMembers"
+                    class="btn btn-sm btn-outline-primary"
+                    :disabled="isLoadingMembers"
+                  >
+                    Load More
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -197,6 +305,7 @@ import {
   apiReadChat,
   apiGetChatFile,
 } from "@func/api/chat";
+import { apiGetMembers, apiAddMember, apiRemoveMember } from "@func/api/chat_member";
 import { apiGetUsers } from "@func/api/user";
 import { LoadingModal, MessageModal, CloseModal } from "@func/swal";
 import { useRouter } from "vue-router";
@@ -270,6 +379,99 @@ watch(searchQuery, (newQuery) => {
   }, 500);
 });
 
+// Member management for existing group chats
+const chatMembers = ref([]);
+const memberMeta = ref(null);
+const isLoadingMembers = ref(false);
+const memberSearchQuery = ref("");
+const filteredMemberUsers = ref([]);
+let memberSearchTimeout = null;
+
+const availableMemberUsers = computed(() => {
+  const existingUserIds = chatMembers.value.map((m) => m.user_id);
+  return filteredMemberUsers.value.filter((u) => !existingUserIds.includes(u.id));
+});
+
+watch(memberSearchQuery, (newQuery) => {
+  if (memberSearchTimeout) clearTimeout(memberSearchTimeout);
+  if (!newQuery.trim()) {
+    filteredMemberUsers.value = [];
+    return;
+  }
+  memberSearchTimeout = setTimeout(async () => {
+    try {
+      const response = await apiGetUsers({ search: newQuery });
+      filteredMemberUsers.value = response.data.users;
+    } catch (error) {
+      MessageModal("error", "Error", error.response?.data?.message || error.message);
+    }
+  }, 500);
+});
+
+async function loadMembers() {
+  if (!props.chatId) return;
+  isLoadingMembers.value = true;
+  try {
+    const response = await apiGetMembers(props.chatId);
+    chatMembers.value = response.data.chat_members;
+    memberMeta.value = response.data.meta;
+  } catch (error) {
+    MessageModal("error", "Error", error.response?.data?.message || error.message);
+  } finally {
+    isLoadingMembers.value = false;
+  }
+}
+
+async function loadMoreMembers() {
+  if (!memberMeta.value || memberMeta.value.current_page >= memberMeta.value.last_page) return;
+  isLoadingMembers.value = true;
+  try {
+    const nextPage = memberMeta.value.current_page + 1;
+    const response = await apiGetMembers(props.chatId, { page: nextPage });
+    chatMembers.value = [...chatMembers.value, ...response.data.chat_members];
+    memberMeta.value = response.data.meta;
+  } catch (error) {
+    MessageModal("error", "Error", error.response?.data?.message || error.message);
+  } finally {
+    isLoadingMembers.value = false;
+  }
+}
+
+async function addChatMember(user) {
+  try {
+    LoadingModal();
+    const response = await apiAddMember(props.chatId, { user_id: user.id });
+    chatMembers.value.push(response.data.chat_member);
+    memberSearchQuery.value = "";
+    filteredMemberUsers.value = [];
+    CloseModal();
+  } catch (error) {
+    MessageModal("error", "Error", error.response?.data?.message || error.message);
+  }
+}
+
+async function removeChatMember(member) {
+  Swal.fire({
+    icon: "warning",
+    title: "Remove Member",
+    text: `Are you sure you want to remove ${member.user?.name} from this chat?`,
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    confirmButtonText: "Yes, remove!",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        LoadingModal();
+        await apiRemoveMember(props.chatId, member.user_id);
+        chatMembers.value = chatMembers.value.filter((m) => m.id !== member.id);
+        CloseModal();
+      } catch (error) {
+        MessageModal("error", "Error", error.response?.data?.message || error.message);
+      }
+    }
+  });
+}
+
 onMounted(() => {
   $(chatModal.value).on("show.bs.modal", async function () {
     if (props.chatId) {
@@ -332,10 +534,11 @@ async function submitChat() {
 
 async function readChat(chatId) {
   const response = await apiReadChat(chatId);
-  // emit("chatUpdated", response.data.chat);
-  // window.dispatchEvent(new CustomEvent("chatUpdated", { detail: response.data.chat }));
   await onChatUpdated(response.data.chat);
   tempChatPhoto.value = chatData.photo;
+  if (chatData.type === 'group') {
+    await loadMembers();
+  }
 }
 
 async function createChat() {
@@ -454,6 +657,10 @@ function resetData() {
   selectedUsers.value = [];
   filteredUsers.value = [];
   searchQuery.value = "";
+  chatMembers.value = [];
+  memberMeta.value = null;
+  memberSearchQuery.value = "";
+  filteredMemberUsers.value = [];
 }
 defineExpose({
   openChatModal,
