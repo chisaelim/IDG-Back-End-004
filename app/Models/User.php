@@ -99,47 +99,47 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(ChatMessage::class);
     }
 
-    public function hasChatAsAdmin($chatId, $throw = true): Chat
+    public function hasChatAsAdmin($chatId): Chat
     {
         $chat = $this->chats()
             ->where('chat_id', $chatId)
             ->wherePivot('role', 'admin')
             ->first();
-        if (!$chat && $throw) {
+        if (!$chat) {
             throw new ModelNotFoundException('Chat not found or user is not an admin.');
         }
         return $chat;
     }
 
-    public function hasChat($chatId, $throw = true) : Chat
+    public function hasChat($chatId) : Chat
     {
         $chat = $this->chats()
             ->where('chat_id', $chatId)
             ->first();
-        if (!$chat && $throw) {
+        if (!$chat) {
             throw new ModelNotFoundException('Chat not found.');
         }
         return $chat;
     }
 
-    public function isChatMember($chatId, $throw = true) : ChatMember
+    public function isChatMember($chatId) : ChatMember
     {
         $member = $this->members()
             ->where('chat_id', $chatId)
             ->first();
-        if (!$member && $throw) {
+        if (!$member) {
             throw new ModelNotFoundException('You are not a member of this chat.');
         }
         return $member;
     }
 
-    public function hasMessageInChat($messageId, $chatId, $throw = true) : ChatMessage
+    public function hasMessageInChat($messageId, $chatId) : ChatMessage
     {
         $message = $this->messages()
             ->where('id', $messageId)
             ->where('chat_id', $chatId)
             ->first();
-        if (!$message && $throw) {
+        if (!$message) {
             throw new ModelNotFoundException('Chat message not found.');
         }
         return $message;

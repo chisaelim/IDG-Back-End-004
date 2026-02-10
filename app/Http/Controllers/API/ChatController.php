@@ -101,6 +101,7 @@ class ChatController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+        
         $chat->loadDefault($user);
         return response([
             'message' => 'Chat created successfully',

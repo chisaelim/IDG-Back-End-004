@@ -44,6 +44,13 @@ class Chat extends Model
                     $query->where('user_id', '<>', $user->id)
                         ->whereNull('seen_at');
                 }
+            ])
+            ->withCount([
+                'members as updatable' => function ($query) use ($user) {
+                    $query->where('role', 'admin')
+                        ->where('user_id', $user->id)
+                        ->whereRaw("chats.type = 'group'");
+                }
             ]);
     }
 
@@ -59,10 +66,17 @@ class Chat extends Model
                 'messages' => function ($query) {
                     $query->latest()->limit(1)->with('user');
                 }
+            ])
+            ->loadCount([
+                'messages as unread_count' => function ($query) use ($user) {
+                    $query->where('user_id', '<>', $user->id)
+                        ->whereNull('seen_at');
+                }
             ])->loadCount([
-                    'messages as unread_count' => function ($query) use ($user) {
-                        $query->where('user_id', '<>', $user->id)
-                            ->whereNull('seen_at');
+                    'members as updatable' => function ($query) use ($user) {
+                        $query->where('role', 'admin')
+                            ->where('user_id', $user->id)
+                            ->whereRaw("chats.type = 'group'");
                     }
                 ]);
 
@@ -98,24 +112,24 @@ class Chat extends Model
         return $this->members()->where('role', 'admin')->orderBy('created_at', 'asc')->first();
     }
 
-    public function hasMember($memberId, $throw = true): ChatMember
+    public function hasMember($memberId): ChatMember
     {
         $member = $this->members()
             ->where('user_id', $memberId)
             ->first();
-        if (!$member && $throw) {
+        if (!$member) {
             throw new ModelNotFoundException('Member not found in this chat.');
         }
         return $member;
     }
 
-    public function hasAdmin($memberId, $throw = true): ChatMember
+    public function hasAdmin($memberId): ChatMember
     {
         $member = $this->members()
             ->where('user_id', $memberId)
             ->where('role', 'admin')
             ->first();
-        if (!$member && $throw) {
+        if (!$member) {
             throw new ModelNotFoundException('Admin member not found in this chat.');
         }
         return $member;
