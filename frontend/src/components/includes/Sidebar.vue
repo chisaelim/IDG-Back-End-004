@@ -134,7 +134,7 @@ import emptyPhoto from "@assets/images/emptyPhoto.png";
 import logoImg from "admin-lte/dist/img/AdminLTELogo.png";
 import { useStore } from "vuex";
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
-import { LoadingModal, MessageModal, CloseModal } from "@func/swal";
+import { MessageModal } from "@func/swal";
 import { apiGetChats, apiGetChatFile } from "@func/api/chat";
 import { apiGetUsers } from "@func/api/user";
 
@@ -181,12 +181,10 @@ onMounted(async () => {
   window.addEventListener("chatDeleted", onChatDeleted);
 
   try {
-    LoadingModal();
     const response = await apiGetChats();
     recentChats.value = response.data.chats;
     chatMeta.value = response.data.meta;
     await processChatImages(recentChats.value);
-    CloseModal();
   } catch (error) {
     return MessageModal("error", "Error", error.response?.data?.message || error.message);
   }

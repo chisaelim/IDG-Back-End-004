@@ -172,7 +172,6 @@ const chatData = reactive({
 });
 const defaultChatData = JSON.parse(JSON.stringify(chatData));
 async function onChatUpdated(chat) {
-  console.log("Chat updated:", chat);
   Object.assign(chatData, chat);
   if (chat.type === "group" && chat.photo) {
     try {
@@ -232,8 +231,6 @@ watch(
 
 async function readChat() {
   try {
-    LoadingModal();
-
     const response = await Promise.all([
       apiReadChat(chatId.value),
       apiGetMessages(chatId.value),
@@ -245,19 +242,12 @@ async function readChat() {
     messages.value = response[1].data.chat_messages.reverse();
     messageMeta.value = response[1].data.meta;
 
-    CloseModal();
-
     await nextTick();
     scrollToBottom();
 
     await apiMarkAllMessagesAsSeen(chatId.value);
   } catch (error) {
-    return MessageModal(
-      "error",
-      "Error",
-      error.response?.data?.message || error.message,
-      () => router.push({name: "dashboard"})
-    );
+    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
   }
 }
 
@@ -281,12 +271,7 @@ async function loadMoreMessages() {
     // Maintain scroll position after prepending older messages
     container.scrollTop = container.scrollHeight - previousScrollHeight;
   } catch (error) {
-    return MessageModal(
-      "error",
-      "Error",
-      error.response?.data?.message || error.message,
-      () => router.push({name: "dashboard"})
-    );
+    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
   } finally {
     isLoadingMore.value = false;
   }
@@ -306,12 +291,7 @@ async function sendMessage() {
     await nextTick();
     scrollToBottom();
   } catch (error) {
-    return MessageModal(
-      "error",
-      "Error",
-      error.response?.data?.message || error.message,
-      () => router.push({name: "dashboard"})
-    );
+    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
   }
 }
 
@@ -344,12 +324,7 @@ async function saveEditMessage(messageId) {
         error.response.data.errors?.content?.[0] || "Invalid input"
       );
     }
-    return MessageModal(
-      "error",
-      "Error",
-      error.response?.data?.message || error.message,
-      () => router.push({name: "dashboard"})
-    );
+    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
   }
 }
 
@@ -371,8 +346,7 @@ async function deleteMessage(messageId) {
         return MessageModal(
           "error",
           "Error",
-          error.response?.data?.message || error.message,
-          () => router.push({name: "dashboard"})
+          error.response?.data?.message || error.message, onChatDeleted
         );
       }
     }

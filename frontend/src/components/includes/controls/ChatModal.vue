@@ -332,8 +332,9 @@ async function submitChat() {
 
 async function readChat(chatId) {
   const response = await apiReadChat(chatId);
-  const chat = response.data.chat;
-  await onChatUpdated(chat);
+  // emit("chatUpdated", response.data.chat);
+  // window.dispatchEvent(new CustomEvent("chatUpdated", { detail: response.data.chat }));
+  await onChatUpdated(response.data.chat);
   tempChatPhoto.value = chatData.photo;
 }
 
@@ -352,6 +353,7 @@ async function updateChat() {
   const response = await apiUpdateGroupChat(props.chatId, chatData);
   emit("chatUpdated", response.data.chat);
   window.dispatchEvent(new CustomEvent("chatUpdated", { detail: response.data.chat }));
+  // await onChatUpdated(response.data.chat);
   hideChatModal();
 }
 
@@ -367,12 +369,11 @@ async function deleteChat() {
     if (result.isConfirmed) {
       try {
         LoadingModal();
-        const response = await apiDeleteGroupChat(props.chatId);
-        emit("chatDeleted");
-        window.dispatchEvent(new CustomEvent("chatDeleted", { detail: props.chatId }));
+        await apiDeleteGroupChat(props.chatId);
         hideChatModal();
-        MessageModal("success", "Success", response.data.message);
-        router.push({ name: "chats" });
+        CloseModal();
+        emit("chatDeleted", props.chatId);
+        window.dispatchEvent(new CustomEvent("chatDeleted", { detail: props.chatId }));
       } catch (error) {
         MessageModal("error", "Error", error.response?.data?.message || error.message);
       }
@@ -392,12 +393,11 @@ async function leaveChat() {
     if (result.isConfirmed) {
       try {
         LoadingModal();
-        const response = await apiLeaveGroupChat(props.chatId);
+        await apiLeaveGroupChat(props.chatId);
+        hideChatModal();
+        CloseModal();
         emit("chatDeleted", props.chatId);
         window.dispatchEvent(new CustomEvent("chatDeleted", { detail: props.chatId }));
-        hideChatModal();
-        MessageModal("success", "Success", response.data.message);
-        router.push({ name: "chats" });
       } catch (error) {
         MessageModal("error", "Error", error.response?.data?.message || error.message);
       }
