@@ -10,7 +10,6 @@
             <h3 class="card-title mx-3">{{ chatData.name }}</h3>
             <div class="card-tools ml-auto">
               <button
-                v-if="chatData.updatable"
                 @click="chatModal.openChatModal"
                 type="button"
                 class="btn btn-tool"
@@ -128,7 +127,12 @@
       </div>
     </section>
   </div>
-  <ChatModal ref="chatModal" :chatId="chatId" @chatUpdated="onChatUpdated" />
+  <ChatModal
+    ref="chatModal"
+    :chatId="chatId"
+    @chatUpdated="onChatUpdated"
+    @chatDeleted="onChatDeleted"
+  />
 </template>
 
 <script setup>
@@ -155,6 +159,7 @@ import {
 import { formatFullDateTime } from "@func/datetime";
 import ChatModal from "@com/includes/controls/ChatModal.vue";
 
+const router = useRouter();
 const route = useRoute();
 const chatId = computed(() => Number(route.params.chatId));
 const chatModal = ref(null);
@@ -167,6 +172,7 @@ const chatData = reactive({
 });
 const defaultChatData = JSON.parse(JSON.stringify(chatData));
 async function onChatUpdated(chat) {
+  console.log("Chat updated:", chat);
   Object.assign(chatData, chat);
   if (chat.type === "group" && chat.photo) {
     try {
@@ -179,6 +185,10 @@ async function onChatUpdated(chat) {
     chatData.photo = chat.photo;
   }
   window.dispatchEvent(new CustomEvent("chatUpdated", { detail: chat }));
+}
+
+function onChatDeleted() {
+  router.push({ name: "dashboard" });
 }
 
 const messages = ref([]);
@@ -239,10 +249,15 @@ async function readChat() {
 
     await nextTick();
     scrollToBottom();
-    
+
     await apiMarkAllMessagesAsSeen(chatId.value);
   } catch (error) {
-    return MessageModal("error", "Error", error.response?.data?.message || error.message);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      () => router.push({name: "dashboard"})
+    );
   }
 }
 
@@ -266,7 +281,12 @@ async function loadMoreMessages() {
     // Maintain scroll position after prepending older messages
     container.scrollTop = container.scrollHeight - previousScrollHeight;
   } catch (error) {
-    MessageModal("error", "Error", error.response?.data?.message || error.message);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      () => router.push({name: "dashboard"})
+    );
   } finally {
     isLoadingMore.value = false;
   }
@@ -286,7 +306,12 @@ async function sendMessage() {
     await nextTick();
     scrollToBottom();
   } catch (error) {
-    MessageModal("error", "Error", error.response?.data?.message || error.message);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      () => router.push({name: "dashboard"})
+    );
   }
 }
 
@@ -319,7 +344,12 @@ async function saveEditMessage(messageId) {
         error.response.data.errors?.content?.[0] || "Invalid input"
       );
     }
-    MessageModal("error", "Error", error.response?.data?.message || error.message);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      () => router.push({name: "dashboard"})
+    );
   }
 }
 
@@ -338,7 +368,12 @@ async function deleteMessage(messageId) {
         await apiDeleteMessage(chatId.value, messageId);
         messages.value = messages.value.filter((m) => m.id !== messageId);
       } catch (error) {
-        MessageModal("error", "Error", error.response?.data?.message || error.message);
+        return MessageModal(
+          "error",
+          "Error",
+          error.response?.data?.message || error.message,
+          () => router.push({name: "dashboard"})
+        );
       }
     }
   });

@@ -139,7 +139,41 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer justify-content-between" v-if="chatData.updatable">
+        <div
+          class="modal-footer justify-content-between"
+          v-if="chatId && chatData.type === 'group'"
+        >
+          <div>
+            <button type="button" class="btn btn-default" @click="hideChatModal">
+              Close
+            </button>
+          </div>
+          <div>
+            <button type="button" class="btn btn-warning mr-2" @click="leaveChat">
+              <i class="fas fa-sign-out-alt"></i> Leave Chat
+            </button>
+            <button
+              v-if="chatData.updatable"
+              type="button"
+              class="btn btn-danger mr-2"
+              @click="deleteChat"
+            >
+              <i class="fas fa-trash"></i> Delete Chat
+            </button>
+            <button
+              v-if="chatData.updatable"
+              type="button"
+              class="btn btn-primary"
+              @click="submitChat"
+            >
+              Update Chat
+            </button>
+          </div>
+        </div>
+        <div
+          class="modal-footer justify-content-between"
+          v-else-if="!chatId || chatData.updatable"
+        >
           <button type="button" class="btn btn-default" @click="hideChatModal">
             Close
           </button>
@@ -158,6 +192,8 @@ import { onMounted, reactive, ref, computed, watch } from "vue";
 import {
   apiCreateChat,
   apiUpdateGroupChat,
+  apiDeleteGroupChat,
+  apiLeaveGroupChat,
   apiReadChat,
   apiGetChatFile,
 } from "@func/api/chat";
@@ -166,7 +202,7 @@ import { LoadingModal, MessageModal, CloseModal } from "@func/swal";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const emit = defineEmits(["chatCreated", "chatUpdated"]);
+const emit = defineEmits(["chatCreated", "chatUpdated", "chatDeleted"]);
 const props = defineProps({
   id: {
     type: String,
@@ -235,29 +271,21 @@ watch(searchQuery, (newQuery) => {
 });
 
 onMounted(() => {
-  $(chatModal.value).on("show.bs.modal", function () {
+  $(chatModal.value).on("show.bs.modal", async function () {
     if (props.chatId) {
-      readChat(props.chatId);
+      try {
+        LoadingModal();
+        await readChat(props.chatId);
+        CloseModal();
+      } catch (error) {
+        MessageModal("error", "Error", error.response?.data?.message || error.message);
+      }
     }
   });
-  $(chatModal.value).on("hide.bs.modal", function () {
+  $(chatModal.value).on("hide.bs.modal", async function () {
     resetData();
   });
 });
-
-async function readChat(chatId) {
-  try {
-    LoadingModal();
-    const response = await apiReadChat(chatId);
-    const chat = response.data.chat;
-    await onChatUpdated(chat);
-    tempChatPhoto.value = chatData.photo;
-    CloseModal();
-  } catch (error) {
-    CloseModal();
-    MessageModal("error", "Error", error.response?.data?.message || error.message);
-  }
-}
 
 function openChatModal() {
   $(chatModal.value).modal("show");
@@ -302,6 +330,13 @@ async function submitChat() {
   }
 }
 
+async function readChat(chatId) {
+  const response = await apiReadChat(chatId);
+  const chat = response.data.chat;
+  await onChatUpdated(chat);
+  tempChatPhoto.value = chatData.photo;
+}
+
 async function createChat() {
   const response = await apiCreateChat(chatData);
   emit("chatCreated", response.data.chat);
@@ -318,6 +353,56 @@ async function updateChat() {
   emit("chatUpdated", response.data.chat);
   window.dispatchEvent(new CustomEvent("chatUpdated", { detail: response.data.chat }));
   hideChatModal();
+}
+
+async function deleteChat() {
+  Swal.fire({
+    icon: "warning",
+    title: "Delete Chat",
+    text: "Are you sure you want to delete this chat? This action cannot be undone.",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        LoadingModal();
+        const response = await apiDeleteGroupChat(props.chatId);
+        emit("chatDeleted");
+        window.dispatchEvent(new CustomEvent("chatDeleted", { detail: props.chatId }));
+        hideChatModal();
+        MessageModal("success", "Success", response.data.message);
+        router.push({ name: "chats" });
+      } catch (error) {
+        MessageModal("error", "Error", error.response?.data?.message || error.message);
+      }
+    }
+  });
+}
+
+async function leaveChat() {
+  Swal.fire({
+    icon: "warning",
+    title: "Leave Chat",
+    text: "Are you sure you want to leave this chat?",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    confirmButtonText: "Yes, leave!",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        LoadingModal();
+        const response = await apiLeaveGroupChat(props.chatId);
+        emit("chatDeleted", props.chatId);
+        window.dispatchEvent(new CustomEvent("chatDeleted", { detail: props.chatId }));
+        hideChatModal();
+        MessageModal("success", "Success", response.data.message);
+        router.push({ name: "chats" });
+      } catch (error) {
+        MessageModal("error", "Error", error.response?.data?.message || error.message);
+      }
+    }
+  });
 }
 
 const allowedExtensions = ["jpg", "jpeg", "png"];

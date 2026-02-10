@@ -164,8 +164,14 @@ class ChatController extends Controller
     public function deleteGroupChat(Request $request, int $chatId)
     {
         $user = $request->user();
-
         $chat = $user->hasChatAsAdmin($chatId);
+
+        if ($chat->type === 'personal') {
+            return response([
+                'message' => 'Cannot delete personal chat'
+            ], 400);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -174,6 +180,9 @@ class ChatController extends Controller
 
             // Delete all members
             $chat->members()->delete();
+
+            // Delete chat files
+            Storage::disk('local')->deleteDirectory("chats/{$chat->id}");
 
             // Delete chat
             $chat->delete();
@@ -191,13 +200,19 @@ class ChatController extends Controller
     {
         $user = $request->user();
         $member = $user->isChatMember($chatId);
+        $chat = $user->hasChat($chatId);
+
+        if ($chat->type === 'personal') {
+            return response([
+                'message' => 'Cannot leave personal chat'
+            ], 400);
+        }
+
         try {
             DB::beginTransaction();
 
-            $chat = Chat::find($chatId);
-
-            // If admin is leaving a group chat, assign another admin
-            if ($member->role === 'admin' && $chat->type === 'group') {
+            // If admin is leaving, assign another member as admin
+            if ($member->role === 'admin') {
                 $newAdmin = ChatMember::where('chat_id', $chatId)
                     ->where('user_id', '<>', $user->id)
                     ->first();
@@ -213,6 +228,7 @@ class ChatController extends Controller
             $remainingMembers = ChatMember::where('chat_id', $chatId)->count();
             if ($remainingMembers === 0) {
                 $chat->messages()->delete();
+                Storage::disk('local')->deleteDirectory("chats/{$chat->id}");
                 $chat->delete();
             }
             DB::commit();
