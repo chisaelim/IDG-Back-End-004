@@ -10,11 +10,14 @@
       {{ chat.last_message ? formatChatTime(chat.last_message.created_at) : "" }}
     </p>
     <br />
-    <p class="chat-message">
-      <span v-if="chat.last_message?.user?.id === userData.id" class="text-bold"
-        >You:
-      </span>
-      {{ chat.last_message ? chat.last_message.content : "Start a new conversation" }}
+    <p class="chat-message mt-1">
+      <span v-if="chat.last_message?.own_message" class="text-bold">You: </span>
+      <span v-if="!chat.last_message">Start a new conversation</span>
+      <span v-else-if="chat.last_message.type === 'image'">Send an image.</span>
+      <span v-else-if="chat.last_message.type === 'audio'">Send an audio.</span>
+      <span v-else-if="chat.last_message.type === 'video'">Send a video.</span>
+      <span v-else-if="chat.last_message.type === 'file'">Send a file.</span>
+      <span v-else>{{ chat.last_message.content }}</span>
     </p>
     <p class="chat-activity-icon">
       <i class="far fa-paper-plane"></i>

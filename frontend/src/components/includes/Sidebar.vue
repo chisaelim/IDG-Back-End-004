@@ -361,7 +361,12 @@ async function onChatCreated(event) {
 async function onChatUpdated(event) {
   const chat = event.detail;
   await processChatImages([chat]);
-  recentChats.value = recentChats.value.map((c) => (c.id === chat.id ? chat : c));
+  const exists = recentChats.value.some((c) => c.id === chat.id);
+  if (exists) {
+    recentChats.value = recentChats.value.map((c) => (c.id === chat.id ? chat : c));
+  } else {
+    recentChats.value.unshift(chat);
+  }
 }
 
 function onChatDeleted(event) {

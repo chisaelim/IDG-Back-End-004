@@ -50,19 +50,17 @@
                 </div>
                 <img class="direct-chat-img" :src="msg.user?.photo || emptyPhoto" />
                 <div class="direct-chat-text">
+                  <!-- Editing mode (text only) -->
                   <span v-if="editingMessageId === msg.id">
                     <input
                       v-model="editingMessage"
-                      @keyup.enter="saveEditMessage(msg.id)"
+                      @keyup.enter="saveEdit()"
                       @keyup.esc="cancelEdit"
                       class="form-control form-control-sm"
                       type="text"
                     />
                     <div class="mt-1">
-                      <button
-                        @click="saveEditMessage(msg.id)"
-                        class="btn btn-xs btn-success mr-1"
-                      >
+                      <button @click="saveEdit()" class="btn btn-xs btn-success mr-1">
                         Save
                       </button>
                       <button @click="cancelEdit" class="btn btn-xs btn-secondary">
@@ -70,7 +68,9 @@
                       </button>
                     </div>
                   </span>
-                  <span v-else>
+
+                  <!-- Text message -->
+                  <span v-else-if="msg.type === 'text'">
                     {{ msg.content }}
                     <span
                       v-if="msg.updated_at !== msg.created_at"
@@ -78,6 +78,39 @@
                     >
                       (edited)
                     </span>
+                  </span>
+
+                  <!-- Image message -->
+                  <span v-else-if="msg.type === 'image'">
+                    <img
+                      :src="msg.content"
+                      class="img-fluid rounded"
+                      style="max-width: 250px; max-height: 250px; cursor: pointer"
+                      @click="openFile(msg.content)"
+                    />
+                  </span>
+
+                  <!-- Video message -->
+                  <span v-else-if="msg.type === 'video'">
+                    <video
+                      controls
+                      :src="msg.content"
+                      class="rounded"
+                      style="max-width: 300px; max-height: 200px"
+                    ></video>
+                  </span>
+
+                  <!-- Video message -->
+                  <span v-else-if="msg.type === 'audio'">
+                    <audio controls :src="msg.content" style="max-width: 250px"></audio>
+                  </span>
+
+                  <!-- File message (includes voice) -->
+                  <span v-else-if="msg.type === 'file'">
+                    <a :href="msg.content" target="_blank" class="text-white">
+                      <i class="fas fa-file mr-1"></i>
+                      {{ msg.originalContent }}
+                    </a>
                   </span>
                 </div>
                 <!-- Actions for own messages -->
@@ -108,16 +141,88 @@
             </div>
           </div>
           <div class="card-footer">
+            <!-- File preview -->
+            <div v-if="selectedFile" class="mb-2 d-flex align-items-center">
+              <span class="badge badge-secondary p-2 mr-2">
+                <i :class="fileTypeIcon"></i>
+                {{ selectedFile.name }}
+              </span>
+              <button @click="clearSelectedFile" class="btn btn-sm btn-danger">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <!-- Voice recording indicator -->
+            <div v-if="isRecording" class="mb-2 d-flex align-items-center">
+              <span class="badge p-2 mr-2" :class="isPaused ? 'badge-warning' : 'badge-danger'">
+                <i class="fas fa-circle text-white" :class="{ blink: !isPaused }"></i>
+                {{ isPaused ? 'Paused' : 'Recording...' }} {{ recordingDuration }}s / {{ audioDuration }}s
+              </span>
+              <button @click="pauseRecording" class="btn btn-sm mr-1" :class="isPaused ? 'btn-info' : 'btn-warning'">
+                <i :class="isPaused ? 'fas fa-microphone' : 'fas fa-pause'"></i>
+                {{ isPaused ? 'Resume' : 'Pause' }}
+              </button>
+              <button @click="stopRecording(false)" class="btn btn-sm btn-success mr-1">
+                <i class="fas fa-paper-plane"></i> Send
+              </button>
+              <button @click="stopRecording(true)" class="btn btn-sm btn-danger">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+            </div>
+
             <div class="input-group">
+              <!-- File upload -->
+              <input
+                ref="fileInput"
+                type="file"
+                class="d-none"
+                @change="onFileSelected"
+              />
+              <span class="input-group-prepend">
+                <button
+                  @click="fileInput.click()"
+                  type="button"
+                  class="btn btn-default"
+                  title="Send file"
+                  :disabled="isRecording"
+                >
+                  <i class="fas fa-paperclip"></i>
+                </button>
+              </span>
+
               <input
                 v-model="newMessage"
                 @keyup.enter="sendMessage"
                 type="text"
                 placeholder="Type Message ..."
                 class="form-control"
+                :disabled="isRecording || !!selectedFile"
               />
+
               <span class="input-group-append">
-                <button @click="sendMessage" type="button" class="btn btn-primary">
+                <!-- Voice record button -->
+                <button
+                  v-if="!newMessage.trim() && !selectedFile"
+                  @click="startRecording"
+                  type="button"
+                  class="btn btn-default"
+                  title="Record voice"
+                  :disabled="isRecording"
+                >
+                  <i class="fas fa-microphone"></i>
+                </button>
+
+                <button v-else-if="isSending" type="button" class="btn btn-primary">
+                  <div
+                    class="spinner-border"
+                    role="status"
+                    style="width: 1rem; height: 1rem"
+                  >
+                    <span class="visually-hidden"></span>
+                  </div>
+                </button>
+                <!-- Send button -->
+                <button v-else @click="sendMessage" type="button" class="btn btn-primary">
                   Send
                 </button>
               </span>
@@ -199,6 +304,21 @@ const newMessage = ref("");
 const editingMessageId = ref(null);
 const editingMessage = ref("");
 
+// File upload
+const selectedFile = ref(null);
+const fileInput = ref(null);
+
+// Voice recording
+const isSending = ref(false);
+const isRecording = ref(false);
+const isPaused = ref(false);
+const recordingDuration = ref(0);
+let mediaRecorder = null;
+let audioDuration = 60;
+let audioChunks = [];
+let recordingTimer = null;
+let isCancelledRecording = false;
+
 // Load chat info and messages
 onMounted(async () => {
   await readChat();
@@ -242,12 +362,19 @@ async function readChat() {
     messages.value = response[1].data.chat_messages.reverse();
     messageMeta.value = response[1].data.meta;
 
+    await processMessages(messages.value);
+
     await nextTick();
     scrollToBottom();
 
     await apiMarkAllMessagesAsSeen(chatId.value);
   } catch (error) {
-    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      onChatDeleted
+    );
   }
 }
 
@@ -265,34 +392,205 @@ async function loadMoreMessages() {
     const response = await apiGetMessages(chatId.value, { page: nextPage });
     const olderMessages = response.data.chat_messages.reverse();
     messageMeta.value = response.data.meta;
+
+    await processMessages(olderMessages);
     messages.value = [...olderMessages, ...messages.value];
 
     await nextTick();
     // Maintain scroll position after prepending older messages
     container.scrollTop = container.scrollHeight - previousScrollHeight;
   } catch (error) {
-    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      onChatDeleted
+    );
   } finally {
     isLoadingMore.value = false;
   }
 }
 
 async function sendMessage() {
-  if (!newMessage.value.trim()) return;
-
   try {
-    const response = await apiCreateMessage(chatId.value, {
-      content: newMessage.value,
-      type: "text",
-    });
-    messages.value.push(response.data.chat_message);
-    newMessage.value = "";
+    isSending.value = true;
+    if (selectedFile.value) {
+      // Send file message
+      const type = getFileType(selectedFile.value);
+      const response = await apiCreateMessage(chatId.value, {
+        content: selectedFile.value,
+        type: type,
+      });
+      const fileMsg = response.data.chat_message;
+      await processMessages([fileMsg]);
+      messages.value.push(fileMsg);
+      clearSelectedFile();
+    } else {
+      // Send text message
+      if (!newMessage.value.trim()) return;
+
+      const response = await apiCreateMessage(chatId.value, {
+        content: newMessage.value,
+        type: "text",
+      });
+      messages.value.push(response.data.chat_message);
+      newMessage.value = "";
+    }
 
     await nextTick();
     scrollToBottom();
   } catch (error) {
-    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      onChatDeleted
+    );
+  } finally {
+    isSending.value = false;
   }
+}
+
+// File helpers
+function getFileType(file) {
+  const mime = file.type;
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  if (mime.startsWith("audio/")) return "audio";
+  return "file";
+}
+
+function onFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  selectedFile.value = file;
+  event.target.value = null;
+}
+
+function clearSelectedFile() {
+  selectedFile.value = null;
+}
+
+const fileTypeIcon = computed(() => {
+  if (!selectedFile.value) return "fas fa-file";
+  const type = getFileType(selectedFile.value);
+  if (type === "image") return "fas fa-image";
+  if (type === "video") return "fas fa-video";
+  if (type === "audio") return "fas fa-microphone";
+  return "fas fa-file";
+});
+
+function isVoiceFile(filename) {
+  if (!filename) return false;
+  return (
+    filename.toLowerCase().endsWith(".webm") || filename.toLowerCase().endsWith(".ogg")
+  );
+}
+
+async function loadFile(uri) {
+  try {
+    const response = await apiGetChatFile(uri);
+    return URL.createObjectURL(response.data);
+  } catch {
+    return emptyPhoto;
+  }
+}
+
+function openFile(url) {
+  window.open(url, "_blank");
+}
+
+async function processMessages(msgs) {
+  await Promise.all(
+    msgs.map(async (msg) => {
+      if (msg.type !== "text") {
+        msg.content = await loadFile(msg.content);
+      }
+    })
+  );
+}
+
+// Voice recording
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    isCancelledRecording = false;
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach((track) => track.stop());
+
+      if (isCancelledRecording || audioChunks.length === 0) return;
+
+      const blob = new Blob(audioChunks, { type: "audio/webm" });
+      const file = new File([blob], `VOICE-${Date.now()}.webm`, { type: "audio/webm" });
+
+      try {
+        const response = await apiCreateMessage(chatId.value, {
+          content: file,
+          type: "audio",
+        });
+        const voiceMsg = response.data.chat_message;
+        await processMessages([voiceMsg]);
+        messages.value.push(voiceMsg);
+
+        await nextTick();
+        scrollToBottom();
+      } catch (error) {
+        MessageModal(
+          "error",
+          "Error",
+          error.response?.data?.message || error.message,
+          onChatDeleted
+        );
+      }
+    };
+
+    mediaRecorder.start();
+    isRecording.value = true;
+    isPaused.value = false;
+    recordingDuration.value = 0;
+    recordingTimer = setInterval(() => {
+      if (!isPaused.value) {
+        recordingDuration.value++;
+        if (recordingDuration.value >= audioDuration) {
+          stopRecording(false);
+        }
+      }
+    }, 1000);
+  } catch (error) {
+    MessageModal(
+      "error",
+      "Error",
+      "Microphone access denied. Please allow microphone permissions."
+    );
+  }
+}
+
+function pauseRecording() {
+  if (!mediaRecorder || mediaRecorder.state === "inactive") return;
+  if (isPaused.value) {
+    mediaRecorder.resume();
+    isPaused.value = false;
+  } else {
+    mediaRecorder.pause();
+    isPaused.value = true;
+  }
+}
+
+function stopRecording(value) {
+  isCancelledRecording = value;
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+  }
+  isRecording.value = false;
+  isPaused.value = false;
+  clearInterval(recordingTimer);
 }
 
 function startEdit(msg) {
@@ -305,15 +603,15 @@ function cancelEdit() {
   editingMessage.value = "";
 }
 
-async function saveEditMessage(messageId) {
+async function saveEdit() {
   if (!editingMessage.value.trim()) return;
 
   try {
-    const response = await apiUpdateMessage(chatId.value, messageId, {
+    const response = await apiUpdateMessage(chatId.value, editingMessageId.value, {
       content: editingMessage.value,
     });
     messages.value = messages.value.map((m) =>
-      m.id === messageId ? response.data.chat_message : m
+      m.id === editingMessageId.value ? response.data.chat_message : m
     );
     cancelEdit();
   } catch (error) {
@@ -324,7 +622,12 @@ async function saveEditMessage(messageId) {
         error.response.data.errors?.content?.[0] || "Invalid input"
       );
     }
-    return MessageModal("error", "Error", error.response?.data?.message || error.message, onChatDeleted);
+    return MessageModal(
+      "error",
+      "Error",
+      error.response?.data?.message || error.message,
+      onChatDeleted
+    );
   }
 }
 
@@ -346,7 +649,8 @@ async function deleteMessage(messageId) {
         return MessageModal(
           "error",
           "Error",
-          error.response?.data?.message || error.message, onChatDeleted
+          error.response?.data?.message || error.message,
+          onChatDeleted
         );
       }
     }
@@ -366,5 +670,7 @@ function resetData() {
   newMessage.value = "";
   editingMessageId.value = null;
   editingMessage.value = "";
+  selectedFile.value = null;
+  stopRecording(true);
 }
 </script>

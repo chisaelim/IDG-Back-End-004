@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,7 +13,7 @@ return new class extends Migration
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->id();
             $table->text('content');
-            $table->enum('type', ['text', 'image', 'video', 'file']);
+            $table->enum('type', ['text', 'image', 'video', 'audio', 'file']);
             $table->unsignedBigInteger('chat_id')->index('chat_id');
             $table->unsignedBigInteger('user_id')->index('user_id');
             $table->timestamp('seen_at')->nullable();

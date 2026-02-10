@@ -9,9 +9,18 @@ class ChatMessageResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $content = $this->content;
+
+        // Build full URL for non-text messages
+        if ($this->type !== 'text') {
+            $folder = $this->type . 's'; // images, videos, files
+            $content = env('APP_URL') . "/api/chats/read/{$this->chat_id}/{$folder}/{$this->content}";
+        }
+
         return [
             'id' => $this->id,
-            'content' => $this->content,
+            'content' => $content,
+            'originalContent' => $this->type !== 'text' ? $this->content : null,
             'type' => $this->type,
             'chat_id' => $this->chat_id,
             'user_id' => $this->user_id,

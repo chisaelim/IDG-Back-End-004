@@ -8,6 +8,7 @@ use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\ChatMessageResource;
 use App\Http\Requests\ChatMessage\SendMessageRequest;
 use App\Http\Requests\ChatMessage\UpdateMessageRequest;
@@ -50,10 +51,23 @@ class ChatMessageController extends Controller
         try {
             DB::beginTransaction();
 
+            $content = $data['content'];
+
+            // Handle file upload for non-text messages
+            if ($data['type'] !== 'text') {
+                $file = $data['content'];
+                $extension = $file->getClientOriginalExtension();
+                $filename = strtoupper($data['type']) . '-' . uniqid() . '.' . $extension;
+                $folder = "chats/{$chatId}/{$data['type']}s";
+
+                Storage::disk('local')->putFileAs($folder, $file, $filename);
+                $content = $filename;
+            }
+
             $message = ChatMessage::create([
                 'chat_id' => $chatId,
                 'user_id' => $user->id,
-                'content' => $data['content'],
+                'content' => $content,
                 'type' => $data['type'],
             ]);
 
@@ -99,6 +113,13 @@ class ChatMessageController extends Controller
         $message = $user->hasMessageInChat($messageId, $chatId);
         try {
             DB::beginTransaction();
+
+            // Remove file from disk for non-text messages
+            if ($message->type !== 'text') {
+                $folder = "chats/{$chatId}/{$message->type}s";
+                Storage::disk('local')->delete("{$folder}/{$message->content}");
+            }
+
             $message->delete();
             DB::commit();
         } catch (Exception $e) {

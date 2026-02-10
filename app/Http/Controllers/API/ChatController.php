@@ -81,7 +81,7 @@ class ChatController extends Controller
             ChatMember::create([
                 'chat_id' => $chat->id,
                 'user_id' => $user->id,
-                'role' => 'admin',
+                'role' => $data['type'] === 'group' ? 'admin' : 'member',
             ]);
 
             // Add other members
