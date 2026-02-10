@@ -122,16 +122,4 @@ class Chat extends Model
         }
         return $member;
     }
-
-    public function hasAdmin($memberId): ChatMember
-    {
-        $member = $this->members()
-            ->where('user_id', $memberId)
-            ->where('role', 'admin')
-            ->first();
-        if (!$member) {
-            throw new ModelNotFoundException('Admin member not found in this chat.');
-        }
-        return $member;
-    }
 }
