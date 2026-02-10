@@ -47,9 +47,34 @@
                   >
                     {{ formatFullDateTime(msg.created_at) }}
                   </span>
+                  <div
+                    v-if="msg.own_message && editingMessageId !== msg.id"
+                    class="float-right"
+                  >
+                    <a
+                      v-if="msg.type === 'text'"
+                      @click="startEdit(msg)"
+                      class="text-primary mr-3 small"
+                      role="button"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a
+                      @click="deleteMessage(msg.id)"
+                      class="text-danger mr-3 small"
+                      role="button"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
                 </div>
                 <img class="direct-chat-img" :src="msg.user?.photo || emptyPhoto" />
-                <div class="direct-chat-text">
+                <div
+                  class="direct-chat-text"
+                  :class="
+                    msg.own_message ? 'text-right float-right' : 'text-left float-left'
+                  "
+                >
                   <!-- Editing mode (text only) -->
                   <span v-if="editingMessageId === msg.id">
                     <input
@@ -114,26 +139,6 @@
                   </span>
                 </div>
                 <!-- Actions for own messages -->
-                <div
-                  v-if="msg.own_message && editingMessageId !== msg.id"
-                  class="mt-1 text-right"
-                >
-                  <a
-                    v-if="msg.type === 'text'"
-                    @click="startEdit(msg)"
-                    class="text-primary mr-2 small"
-                    role="button"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <a
-                    @click="deleteMessage(msg.id)"
-                    class="text-danger small"
-                    role="button"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </a>
-                </div>
               </div>
               <div v-if="!messages.length" class="text-center text-muted p-3">
                 No messages yet. Start a conversation!
@@ -154,13 +159,21 @@
 
             <!-- Voice recording indicator -->
             <div v-if="isRecording" class="mb-2 d-flex align-items-center">
-              <span class="badge p-2 mr-2" :class="isPaused ? 'badge-warning' : 'badge-danger'">
+              <span
+                class="badge p-2 mr-2"
+                :class="isPaused ? 'badge-warning' : 'badge-danger'"
+              >
                 <i class="fas fa-circle text-white" :class="{ blink: !isPaused }"></i>
-                {{ isPaused ? 'Paused' : 'Recording...' }} {{ recordingDuration }}s / {{ audioDuration }}s
+                {{ isPaused ? "Paused" : "Recording..." }} {{ recordingDuration }}s /
+                {{ audioDuration }}s
               </span>
-              <button @click="pauseRecording" class="btn btn-sm mr-1" :class="isPaused ? 'btn-info' : 'btn-warning'">
+              <button
+                @click="pauseRecording"
+                class="btn btn-sm mr-1"
+                :class="isPaused ? 'btn-info' : 'btn-warning'"
+              >
                 <i :class="isPaused ? 'fas fa-microphone' : 'fas fa-pause'"></i>
-                {{ isPaused ? 'Resume' : 'Pause' }}
+                {{ isPaused ? "Resume" : "Pause" }}
               </button>
               <button @click="stopRecording(false)" class="btn btn-sm btn-success mr-1">
                 <i class="fas fa-paper-plane"></i> Send
