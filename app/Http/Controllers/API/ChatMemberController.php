@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use Exception;
 use App\Models\Chat;
+use App\Models\User;
 use App\Models\ChatMember;
+use App\Events\ChatCreated;
+use App\Events\ChatDeleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -68,6 +71,10 @@ class ChatMemberController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+
+        // Notify the added user about the new chat
+        broadcast(new ChatCreated($chat, $data['user_id']));
+
         return response([
             'message' => 'Member added successfully',
             'chat_member' => new ChatMemberResource($member->load('user'))
@@ -126,6 +133,10 @@ class ChatMemberController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+
+        // Notify the removed user
+        broadcast(new ChatDeleted($chatId, $member->user_id));
+
         return response([
             'message' => 'Member removed successfully'
         ]);

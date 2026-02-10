@@ -32,23 +32,23 @@
                 v-for="msg in messages"
                 :key="msg.id"
                 class="direct-chat-msg"
-                :class="{ right: msg.own_message }"
+                :class="{ right: isOwnMessage(msg) }"
               >
                 <div class="direct-chat-infos clearfix">
                   <span
                     class="direct-chat-name"
-                    :class="msg.own_message ? 'float-right' : 'float-left'"
+                    :class="isOwnMessage(msg) ? 'float-right' : 'float-left'"
                   >
                     {{ msg.user?.name }}
                   </span>
                   <span
                     class="direct-chat-timestamp"
-                    :class="msg.own_message ? 'float-left' : 'float-right'"
+                    :class="isOwnMessage(msg) ? 'float-left' : 'float-right'"
                   >
                     {{ formatFullDateTime(msg.created_at) }}
                   </span>
                   <div
-                    v-if="msg.own_message && editingMessageId !== msg.id"
+                    v-if="isOwnMessage(msg) && editingMessageId !== msg.id"
                     class="float-right"
                   >
                     <a
@@ -72,7 +72,7 @@
                 <div
                   class="direct-chat-text"
                   :class="
-                    msg.own_message ? 'text-right float-right' : 'text-left float-left'
+                    isOwnMessage(msg) ? 'text-right float-right' : 'text-left float-left'
                   "
                 >
                   <!-- Editing mode (text only) -->
@@ -256,6 +256,7 @@
 <script setup>
 import emptyPhoto from "@assets/images/emptyPhoto.png";
 import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
 import {
   computed,
   onMounted,
@@ -277,11 +278,18 @@ import {
 import { formatFullDateTime } from "@func/datetime";
 import ChatModal from "@com/includes/controls/ChatModal.vue";
 
+
+const store = useStore();
 const router = useRouter();
 const route = useRoute();
 const chatId = computed(() => Number(route.params.chatId));
 const chatModal = ref(null);
 
+const userData = computed(() => store.state.user);
+
+function isOwnMessage(message) {
+  return message.user_id === userData.value.id;
+}
 const chatData = reactive({
   name: "",
   photo: null,
@@ -346,6 +354,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  Echo.leave(`MessageEvent.${chatId.value}`);
   if (messagesContainer.value) {
     $(messagesContainer.value).off("scroll");
   }
@@ -354,7 +363,10 @@ onBeforeUnmount(() => {
 // Watch for route param changes (switching between chats)
 watch(
   () => route.params.chatId,
-  async (newChatId) => {
+  async (newChatId, oldChatId) => {
+    if (oldChatId) {
+      Echo.leave(`MessageEvent.${oldChatId}`);
+    }
     if (newChatId) {
       resetData();
       await readChat();
@@ -381,6 +393,29 @@ async function readChat() {
     scrollToBottom();
 
     await apiMarkAllMessagesAsSeen(chatId.value);
+
+    Echo.private(`MessageEvent.${chatId.value}`)
+      .listen(".MessageCreated", async (e) => {
+        const newMsg = e.message;
+        if (newMsg.type !== "text") {
+          newMsg.content = await loadFile(newMsg.content);
+        }
+        messages.value.push(newMsg);
+        await nextTick();
+        scrollToBottom();
+      })
+      .listen(".MessageUpdated", async (e) => {
+        const updatedMsg = e.message;
+        if (updatedMsg.type !== "text") {
+          updatedMsg.content = await loadFile(updatedMsg.content);
+        }
+        messages.value = messages.value.map((m) =>
+          m.id === updatedMsg.id ? updatedMsg : m
+        );
+      })
+      .listen(".MessageDeleted", (e) => {
+        messages.value = messages.value.filter((m) => m.id !== e.messageId);
+      });
   } catch (error) {
     return MessageModal(
       "error",

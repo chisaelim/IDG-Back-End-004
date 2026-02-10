@@ -26,6 +26,6 @@ php artisan queue:retry all
 
 # Start services
 apache2-foreground &
-# php artisan reverb:start &
+php artisan reverb:start &
 # php artisan schedule:work &
 php artisan queue:work

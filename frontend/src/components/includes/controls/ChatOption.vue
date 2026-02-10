@@ -11,7 +11,7 @@
     </p>
     <br />
     <p class="chat-message mt-1">
-      <span v-if="chat.last_message?.own_message" class="text-bold">You: </span>
+      <span v-if="isOwnMessage(chat?.last_message)" class="text-bold">You: </span>
       <span v-if="!chat.last_message">Start a new conversation</span>
       <span v-else-if="chat.last_message.type === 'image'">Send an image.</span>
       <span v-else-if="chat.last_message.type === 'audio'">Send an audio.</span>
@@ -38,4 +38,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+function isOwnMessage(message) {
+  return message?.user_id === userData.value.id;
+}
 </script>

@@ -184,6 +184,13 @@ Develop API endpoints to support chat features in your Laravel application:
 Adopt a reusable MVC pattern for better code organization and maintainability:  
 👉 [Implement Reusable MVC Pattern](./instructions/26.ImplementReusableMVCPattern.md)
 
+** Step 27: Implement Real-Time Chat Vue Frontend**  
+Enable real-time chat functionality using Laravel Echo and Pusher:  
+👉 [Implement Real-Time Chat Vue Frontend](./instructions/27.ImplementChatFrontEnd.md)
+
+** Step 28: Implement WebSocket Broadcasting for Real-Time Updates**  
+Set up WebSocket broadcasting to provide real-time updates for chat messages and notifications:  
+👉 [Implement WebSocket Broadcasting for Real-Time Updates](./instructions/28.ImplementWebsocket.md)
 ---
 
 ## Project Structure

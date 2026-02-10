@@ -141,7 +141,10 @@ import { apiGetUsers } from "@func/api/user";
 import ChatOption from "@com/includes/controls/ChatOption.vue";
 import UserOption from "@com/includes/controls/UserOption.vue";
 import ChatModal from "@com/includes/controls/ChatModal.vue";
+import { useRoute, useRouter } from "vue-router";
 
+const router = useRouter();
+const route = useRoute();
 const store = useStore();
 const userData = computed(() => store.state.user);
 const isAdmin = computed(() => userData.value && userData.value.level === "admin");
@@ -180,6 +183,11 @@ onMounted(async () => {
   window.addEventListener("chatUpdated", onChatUpdated);
   window.addEventListener("chatDeleted", onChatDeleted);
 
+  // Subscribe to the user's private ChatEvent channel for real-time chat events
+  if (userData.value?.id) {
+    subscribeToChatChannel(userData.value.id);
+  }
+
   try {
     const response = await apiGetChats();
     recentChats.value = response.data.chats;
@@ -211,7 +219,52 @@ onBeforeUnmount(() => {
   window.removeEventListener("chatCreated", onChatCreated);
   window.removeEventListener("chatUpdated", onChatUpdated);
   window.removeEventListener("chatDeleted", onChatDeleted);
+
+  // Leave the Echo ChatEvent channel
+  if (userData.value?.id) {
+    window.Echo.leave(`ChatEvent.${userData.value.id}`);
+  }
 });
+
+// If user data loads after mount, subscribe then
+watch(
+  () => userData.value?.id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      if (oldId) {
+        window.Echo.leave(`ChatEvent.${oldId}`);
+      }
+      subscribeToChatChannel(newId);
+    }
+  }
+);
+
+function subscribeToChatChannel(userId) {
+  window.Echo.private(`ChatEvent.${userId}`)
+    .listen(".ChatCreated", async (e) => {
+      const chat = e.chat;
+      await processChatImages([chat]);
+      recentChats.value.unshift(chat);
+    })
+    .listen(".ChatUpdated", async (e) => {
+      const chat = e.chat;
+      await processChatImages([chat]);
+      const exists = recentChats.value.some((c) => c.id === chat.id);
+      if (exists) {
+        recentChats.value = recentChats.value.map((c) => (c.id === chat.id ? chat : c));
+      } else {
+        recentChats.value.unshift(chat);
+      }
+    })
+    .listen(".ChatDeleted", (e) => {
+      const id = e.chatId;
+      recentChats.value = recentChats.value.filter((c) => c.id !== id);
+      if(route.name === 'chats' && route.params.chatId == id) {
+        // If currently viewing the deleted chat, redirect to dashboard
+        router.push({ name: 'dashboard' });
+      }
+    });
+}
 
 async function loadMoreChats() {
   if (isLoadingMore.value) return;

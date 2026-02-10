@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use Exception;
 use App\Models\Chat;
+use App\Events\ChatUpdated;
 use App\Models\ChatMessage;
 use Illuminate\Http\Request;
+use App\Events\MessageCreated;
+use App\Events\MessageDeleted;
+use App\Events\MessageUpdated;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -76,6 +80,12 @@ class ChatMessageController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+
+        broadcast(new MessageCreated($message))->toOthers();
+        $userIds = Chat::find($chatId)->members()->pluck('id')->toArray();
+        foreach ($userIds as $userId) {
+            broadcast(new ChatUpdated($message->chat()->first(), $userId))->toOthers();
+        }
         return response([
             'message' => 'Message sent successfully',
             'chat_message' => new ChatMessageResource($message->load('user'))
@@ -100,8 +110,13 @@ class ChatMessageController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
-        return response([
 
+        broadcast(new MessageUpdated($message))->toOthers();
+        $userIds = Chat::find($chatId)->members()->pluck('id')->toArray();
+        foreach ($userIds as $userId) {
+            broadcast(new ChatUpdated($message->chat()->first(), $userId))->toOthers();
+        }
+        return response([
             'message' => 'Message updated successfully',
             'chat_message' => new ChatMessageResource($message->load('user'))
         ]);
@@ -126,6 +141,13 @@ class ChatMessageController extends Controller
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+
+        broadcast(new MessageDeleted($message->id, $chatId))->toOthers();
+        $userIds = Chat::find($chatId)->members()->pluck('id')->toArray();
+        foreach ($userIds as $userId) {
+            broadcast(new ChatUpdated($message->chat()->first(), $userId))->toOthers();
+        }
+
         return response([
             'message' => 'Message deleted successfully'
         ]);
@@ -165,7 +187,7 @@ class ChatMessageController extends Controller
         $user = $request->user();
 
         $user->isChatMember($chatId);
-        
+
         try {
             DB::beginTransaction();
             $updatedCount = ChatMessage::where('chat_id', $chatId)
