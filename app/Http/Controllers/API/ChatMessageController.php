@@ -84,7 +84,7 @@ class ChatMessageController extends Controller
         broadcast(new MessageCreated($message))->toOthers();
         $userIds = Chat::find($chatId)->members()->pluck('user_id')->toArray();
         foreach ($userIds as $userId) {
-            broadcast(new ChatUpdated($message->chat()->first(), $userId))->toOthers();
+            broadcast(new ChatUpdated($message->chat()->first(), $userId));
         }
         return response([
             'message' => 'Message sent successfully',
@@ -114,7 +114,7 @@ class ChatMessageController extends Controller
         broadcast(new MessageUpdated($message))->toOthers();
         $userIds = Chat::find($chatId)->members()->pluck('user_id')->toArray();
         foreach ($userIds as $userId) {
-            broadcast(new ChatUpdated($message->chat()->first(), $userId))->toOthers();
+            broadcast(new ChatUpdated($message->chat()->first(), $userId));
         }
         return response([
             'message' => 'Message updated successfully',
@@ -145,7 +145,7 @@ class ChatMessageController extends Controller
         broadcast(new MessageDeleted($message->id, $chatId))->toOthers();
         $userIds = Chat::find($chatId)->members()->pluck('user_id')->toArray();
         foreach ($userIds as $userId) {
-            broadcast(new ChatUpdated($message->chat()->first(), $userId))->toOthers();
+            broadcast(new ChatUpdated($message->chat()->first(), $userId));
         }
 
         return response([
