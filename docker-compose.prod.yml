@@ -29,13 +29,14 @@ services:
       GOOGLE_REDIRECT_URL: "https://ultralink.cloud/api/auth/google/callback"
 
       # Reverb Configuration
+      BROADCAST_CONNECTION: reverb
       REVERB_APP_ID: ${REVERB_APP_ID}
       REVERB_APP_KEY: ${REVERB_APP_KEY}
       REVERB_APP_SECRET: ${REVERB_APP_SECRET}
       REVERB_HOST: "0.0.0.0"
       REVERB_PORT: 8080
       REVERB_SCHEME: "http"
-      REVERB_PATH: ""
+      REVERB_PATH: "/app"
 
       # Database Configuration
       DB_CONNECTION: mysql
