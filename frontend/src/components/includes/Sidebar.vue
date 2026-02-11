@@ -49,6 +49,12 @@
               <p>Backups</p>
             </router-link>
           </li>
+          <li v-if="isAdmin" class="nav-item">
+            <router-link :to="{ name: 'users' }" class="nav-link" active-class="active">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Users</p>
+            </router-link>
+          </li>
         </ul>
       </nav>
       <hr />

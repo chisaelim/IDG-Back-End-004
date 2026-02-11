@@ -15,6 +15,7 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@tanstack/vue-table": "^8.21.3",
     "admin-lte": "^3.2.0",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
