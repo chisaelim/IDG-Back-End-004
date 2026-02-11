@@ -6,6 +6,7 @@ chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/storage/app
 chown -R www-data:www-data /var/www/html/storage/app/public
 chown -R www-data:www-data /var/www/html/storage/app/private
+chmod -R g+s /var/www/html/storage
 
 # Install dependencies without production optimizations
 composer install

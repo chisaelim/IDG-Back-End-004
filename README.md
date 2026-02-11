@@ -192,6 +192,10 @@ Enable real-time chat functionality using Laravel Echo and Pusher:
 Set up WebSocket broadcasting to provide real-time updates for chat messages and notifications:  
 👉 [Implement WebSocket Broadcasting for Real-Time Updates](./instructions/28.ImplementWebsocket.md)
 
+** Step 29: Config Nginx and Docker for Production**  
+Configure Nginx and Docker for a production environment:  
+👉 [Config Nginx and Docker for Production](./instructions/29.ConfigWebsocketsForProduction.md)
+
 ---
 
 ## Project Structure
