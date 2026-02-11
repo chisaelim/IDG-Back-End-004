@@ -9,6 +9,11 @@ server {
     ssl_certificate /etc/letsencrypt/live/ultralink.cloud/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ultralink.cloud/privkey.pem;
 
+    # File upload limits for 4GB VPS
+    client_max_body_size 50M;
+    client_body_timeout 60s;
+    client_header_timeout 60s;
+
     location /api/ {
         proxy_pass http://localhost:8000;
         proxy_set_header Host $host;
@@ -16,6 +21,12 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-Host $host;
+        
+        # Optimize for file uploads on limited resources
+        proxy_request_buffering off;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_connect_timeout 30s;
     }
 
     # Send WebSocket traffic to port 8080
