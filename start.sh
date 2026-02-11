@@ -3,9 +3,10 @@ set -e
 
 chown -R www-data:www-data /var/www/html/bootstrap/cache
 chown -R www-data:www-data /var/www/html/storage
-chown -R www-data:www-data /var/www/html/storage/app
-chown -R www-data:www-data /var/www/html/storage/app/public
-chown -R www-data:www-data /var/www/html/storage/app/private
+chown -R www-data:www-data /var/www/html/storage/app #optinal
+chown -R www-data:www-data /var/www/html/storage/app/public #optinal
+chown -R www-data:www-data /var/www/html/storage/app/private #optinal
+chmod -R g+s /var/www/html/storage
 
 composer install
 wait $!
