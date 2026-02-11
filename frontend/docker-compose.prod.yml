@@ -9,7 +9,7 @@ services:
         VITE_REVERB_HOST: "ultralink.cloud"
         VITE_REVERB_PORT: 443
         VITE_REVERB_SCHEME: "https"
-        VITE_REVERB_PATH: "/app"
+        VITE_REVERB_PATH: ""
     image: my-front-production:latest
     container_name: my-front-production-container
     ports:
