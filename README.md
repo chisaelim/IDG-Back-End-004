@@ -191,6 +191,7 @@ Enable real-time chat functionality using Laravel Echo and Pusher:
 ** Step 28: Implement WebSocket Broadcasting for Real-Time Updates**  
 Set up WebSocket broadcasting to provide real-time updates for chat messages and notifications:  
 👉 [Implement WebSocket Broadcasting for Real-Time Updates](./instructions/28.ImplementWebsocket.md)
+
 ---
 
 ## Project Structure
