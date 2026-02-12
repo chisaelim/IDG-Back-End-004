@@ -171,6 +171,7 @@ class ChatMessageController extends Controller
         }
         try {
             DB::beginTransaction();
+            $message->timestamps = false; // Disable automatic timestamp update
             $message->update(['seen_at' => now()]);
             DB::commit();
         } catch (Exception $e) {
@@ -190,10 +191,14 @@ class ChatMessageController extends Controller
 
         try {
             DB::beginTransaction();
-            $updatedCount = ChatMessage::where('chat_id', $chatId)
-                ->where('user_id', '<>', $user->id)
-                ->whereNull('seen_at')
-                ->update(['seen_at' => now()]);
+            $messages = ChatMessage::where('chat_id', $chatId)
+                ->where('user_id', '<>', $user->id) // Can't marek own messages as seen
+                ->whereNull('seen_at')->get();
+            $messages->each(function ($message) {
+                $message->timestamps = false;
+                $message->update(['seen_at' => now()]);
+            });
+
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
