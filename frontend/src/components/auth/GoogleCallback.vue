@@ -32,7 +32,16 @@ onMounted(async () => {
       const response = await patchRefreshToken(token);
       localStorage.setItem("token", response.data.token);
       await store.dispatch("verifyAccount");
+
+      const intendedPath = localStorage.getItem("intendedPath");
+      if (intendedPath) {
+        localStorage.removeItem("intendedPath");
+        router.replace(intendedPath);
+        return;
+      }
+
       router.replace({ name: "dashboard" });
+      return;
     } else {
       router.replace({ name: "auth.signin" });
     }

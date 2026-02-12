@@ -102,6 +102,14 @@ async function signIn() {
     localStorage.setItem("token", response.data.token);
     await store.dispatch("verifyAccount");
     resetData();
+
+    const intendedPath = localStorage.getItem("intendedPath");
+    if (intendedPath) {
+      localStorage.removeItem("intendedPath");
+      router.replace(intendedPath);
+      return;
+    }
+
     router.replace({ name: "dashboard" });
     CloseModal();
   } catch (error) {

@@ -35,8 +35,8 @@ window.Echo = new Echo({
                         Authorization: 'Bearer ' + (localStorage.getItem('token') || ''),
                     },
                 })
-                .then(response => callback(null, response.data))
-                .catch(error => callback(error));
+                    .then(response => callback(null, response.data))
+                    .catch(error => callback(error));
             },
         };
     },
@@ -103,6 +103,8 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: 'dashboard' })
     }
     if (guard && !isAuthenticated) {
+        const intendedPath = to.path;
+        localStorage.setItem('intendedPath', intendedPath);
         return next({ name: 'auth.signin' });
     }
     return next();
