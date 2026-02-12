@@ -196,6 +196,10 @@ Set up WebSocket broadcasting to provide real-time updates for chat messages and
 Configure Nginx and Docker for a production environment:  
 👉 [Config Nginx and Docker for Production](./instructions/29.ConfigWebsocketsForProduction.md)
 
+** Step 30: User Crud Operations with TanStack Table**  
+Implement user CRUD operations and create an admin panel for managing users:  
+👉 [User Crud Operations with TanStack Table](./instructions/30.UserCrudWithTableTanstackTable.md)
+
 ---
 
 ## Project Structure
